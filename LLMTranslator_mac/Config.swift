@@ -7,17 +7,22 @@ public struct RequestBody: Codable, Equatable {
     public var temperature: Double
     public var max_tokens: Int
     public var stream: Bool
-    public var tool_choice: String
-    public var enable_thinking: Bool
+    public var tool_choice: String?
+    public var enable_thinking: Bool?
 
     func toDictionary() -> [String: Any] {
-        return [
+        var dict: [String: Any] = [
             "temperature": temperature,
             "max_tokens": max_tokens,
-            "stream": stream,
-            "tool_choice": tool_choice,
-            "enable_thinking": enable_thinking
+            "stream": stream
         ]
+        if let toolChoice = tool_choice {
+            dict["tool_choice"] = toolChoice
+        }
+        if let enableThinking = enable_thinking {
+            dict["enable_thinking"] = enableThinking
+        }
+        return dict
     }
 }
 
@@ -49,7 +54,7 @@ public struct AppConfig: Codable, Equatable {
 
 // MARK: - Settings store (read-only)
 
-/// Loads `settings.json` from the app bundle on startup. No fallbacks, no UserDefaults.
+/// Loads settings from JSON. Use SETTINGS_FILE env var to specify alternative config (e.g., "settings.openai").
 public final class SettingsStore: ObservableObject {
     public static let shared = SettingsStore()
 
@@ -57,15 +62,28 @@ public final class SettingsStore: ObservableObject {
     @Published public private(set) var config: AppConfig
 
     private init() {
-        guard let url = Bundle.main.url(forResource: "settings", withExtension: "json") else {
-            fatalError("Missing settings.json in bundle. Add it to the target resources.")
+        let settingsFileName = ProcessInfo.processInfo.environment["SETTINGS_FILE"] ?? "settings"
+
+        guard let url = Bundle.main.url(forResource: settingsFileName, withExtension: "json") else {
+            fatalError("Missing \(settingsFileName).json in bundle. Add it to the target resources.")
         }
         do {
             let data = try Data(contentsOf: url)
             let decoder = JSONDecoder()
-            self.config = try decoder.decode(AppConfig.self, from: data)
+            var loadedConfig = try decoder.decode(AppConfig.self, from: data)
+
+            if loadedConfig.apiKey == nil || loadedConfig.apiKey?.isEmpty == true {
+                if let keyURL = Bundle.main.url(forResource: ".openai-key", withExtension: nil),
+                   let keyData = try? Data(contentsOf: keyURL),
+                   let key = String(data: keyData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) {
+                    loadedConfig.apiKey = key
+                }
+            }
+
+            self.config = loadedConfig
+            print("✓ Loaded configuration from \(settingsFileName).json")
         } catch {
-            fatalError("Failed to load settings.json: \(error)")
+            fatalError("Failed to load \(settingsFileName).json: \(error)")
         }
     }
 }

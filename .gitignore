@@ -6,3 +6,7 @@ LLMTranslator_macUITests/
 .cursor*
 .claude
 GEMINI.md
+# API keys and sensitive settings
+.openai-key
+.env
+.env.*
