@@ -1,6 +1,6 @@
 import Foundation
 
-/// A provider that connects to any OpenAI-compatible Chat Completions endpoint.
+/// A provider that connects to any Chat Completions API endpoint.
 public final class LLMProvider: TranslationProvider {
     private let session: URLSession
 
@@ -63,23 +63,7 @@ public final class LLMProvider: TranslationProvider {
             throw NSError(domain: "LLMProvider", code: 2,
                           userInfo: [NSLocalizedDescriptionKey: "Empty response from language model"])
         }
-        return clean(raw)
-    }
-
-    // MARK: - Post-processing
-    /// Removes any Qwen-style thinking blocks or stray tags, then trims whitespace.
-    private func clean(_ text: String) -> String {
-        var cleaned = text.replacingOccurrences(
-            of: "(?s)<think>.*?</think>",
-            with: "",
-            options: [.regularExpression, .caseInsensitive]
-        )
-        cleaned = cleaned.replacingOccurrences(
-            of: "</?think>",
-            with: "",
-            options: [.regularExpression, .caseInsensitive]
-        )
-        return cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
+        return raw.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     // MARK: - Payload builder
@@ -98,30 +82,14 @@ public final class LLMProvider: TranslationProvider {
     // MARK: - Prompt construction
     private func buildMessages(for text: String, from srcLang: String, to dstLang: String) -> [[String: String]] {
         let systemPrompt = """
-        You are a bilingual translation assistant. Always translate the user's message from \(srcLang) to \(dstLang).
-            It can be a single character, word, phrase or large text.
-        Rules:
-        1. Preserve meaning, tone, punctuation, and formatting.
-        2. Output ONLY the translated text without additional commentary.
-        /no_think
+        Translate from \(srcLang) to \(dstLang).
+        Preserve every character of formatting: spaces, newlines, tabs, punctuation, emojis, special symbols.
+        Output ONLY the translation, nothing else.
         """
 
-        var msgs: [[String: String]] = [["role": "system", "content": systemPrompt]]
-
-        if let url = Bundle.main.url(forResource: "few_shot_examples", withExtension: "json"),
-           let data = try? Data(contentsOf: url) {
-            let decoder = JSONDecoder()
-            if let examples = try? decoder.decode([[String: String]].self, from: data) {
-                for example in examples {
-                    if let srcText = example[srcLang], let dstText = example[dstLang] {
-                        msgs.append(["role": "user",      "content": srcText])
-                        msgs.append(["role": "assistant", "content": dstText])
-                    }
-                }
-            }
-        }
-
-        msgs.append(["role": "user", "content": text])
-        return msgs
+        return [
+            ["role": "system", "content": systemPrompt],
+            ["role": "user", "content": text]
+        ]
     }
 }

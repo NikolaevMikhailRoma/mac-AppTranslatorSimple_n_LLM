@@ -7,6 +7,6 @@ LLMTranslator_macUITests/
 .claude
 GEMINI.md
 # API keys and sensitive settings
-.openai-key
+.api-key
 .env
 .env.*

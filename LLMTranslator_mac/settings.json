@@ -1,7 +1,7 @@
 {
-    "baseURL": "https://api.openai.com/v1/chat/completions",
+    "baseURL": "http://127.0.0.1:1234/v1/chat/completions",
     "apiKey": null,
-    "modelIdentifier": "gpt-4o-mini",
+    "modelIdentifier": null,
     "languageCodes": [
         "ru",
         "en"
@@ -11,7 +11,8 @@
     "requestBody": {
         "temperature": 0.0,
         "max_tokens": 1024,
-        "stream": false
+        "stream": false,
+        "enable_thinking": false
     },
     "maxLineLength": 160
 }

@@ -28,7 +28,7 @@ public struct RequestBody: Codable, Equatable {
 
 /// Minimal app configuration loaded from a single JSON file.
 public struct AppConfig: Codable, Equatable {
-    /// The base URL of the OpenAI-compatible API.
+    /// The base URL of the LLM API endpoint.
     public var baseURL: String
     /// The API key for the service. Optional, as local servers may not require one.
     public var apiKey: String?
@@ -54,7 +54,7 @@ public struct AppConfig: Codable, Equatable {
 
 // MARK: - Settings store (read-only)
 
-/// Loads settings from JSON. Use SETTINGS_FILE env var to specify alternative config (e.g., "settings.openai").
+/// Loads settings from JSON. Use SETTINGS_FILE env var to specify alternative config.
 public final class SettingsStore: ObservableObject {
     public static let shared = SettingsStore()
 
@@ -71,14 +71,6 @@ public final class SettingsStore: ObservableObject {
             let data = try Data(contentsOf: url)
             let decoder = JSONDecoder()
             var loadedConfig = try decoder.decode(AppConfig.self, from: data)
-
-            if loadedConfig.apiKey == nil || loadedConfig.apiKey?.isEmpty == true {
-                if let keyURL = Bundle.main.url(forResource: ".openai-key", withExtension: nil),
-                   let keyData = try? Data(contentsOf: keyURL),
-                   let key = String(data: keyData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) {
-                    loadedConfig.apiKey = key
-                }
-            }
 
             self.config = loadedConfig
             print("✓ Loaded configuration from \(settingsFileName).json")

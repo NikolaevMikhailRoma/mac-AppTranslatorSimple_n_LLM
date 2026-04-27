@@ -1,15 +1,15 @@
 # LLMTranslator_mac
 
-Menu‑bar macOS app. Press ⌘ C C → instant EN↔RU translation bubble. Language choosing automatic.
+Menu-bar macOS app. Press ⌘ C C → instant EN↔RU translation bubble. Language choosing automatic.
 
-- Monitors clipboard; shows SwiftUI pop‑over at cursor.
-- Calls local LLM via LM Studio (OpenAI‑style API on 127.0.0.1:1234).
+- Monitors clipboard; shows SwiftUI pop-over at cursor.
+- Calls local LLM via LM Studio API on 127.0.0.1:1234.
 
 ## Requires
 
-- macOS 13+ on Apple Silicon (GPU)
-- Xcode 15 / Swift 5.9
-- LM Studio running with an open‑source model
+- macOS 13+ on Apple Silicon (GPU)
+- Xcode 15 / Swift 5.9
+- LM Studio running with an open-source model
 
 ## Entitlements
 
@@ -28,10 +28,8 @@ LLMTranslator_mac/
     TranslationProvider.swift               # Translation provider protocol
     LanguageDetector.swift                  # Automatic language detection
     ClipboardService.swift                  # Clipboard monitoring
-    llm/
-      few_shot_examples.json                # Translation examples
   Provider/
-    LMStudioProvider.swift                  # LM Studio (OpenAI API compatible)
+    LLMProvider.swift                       # LLM API provider
   Config.swift                              # App configuration
   ClipTranslatorApp.swift                   # App entry point
   AppDelegate.swift                         # Menu-bar, clipboard and popover logic
