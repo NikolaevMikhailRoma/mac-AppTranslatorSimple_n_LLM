@@ -8,7 +8,7 @@ enum ProviderFactory {
         switch settings.method {
         case .host:
             var body = config.requestBody
-            body.max_tokens = settings.developer.maxTokens
+            body.max_tokens = settings.host.maxTokens
             return LLMProvider(host: settings.host, requestBody: body, trimsWhitespace: settings.trimTranslation)
         }
     }

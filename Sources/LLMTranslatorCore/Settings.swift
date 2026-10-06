@@ -17,8 +17,12 @@ public enum TranslationMethod: String, Codable, CaseIterable, Identifiable, Send
 public struct HostSettings: Codable, Equatable, Sendable {
     /// Up to and including `/v1`, the way OpenAI-compatible servers print it.
     public var baseURL = "http://127.0.0.1:1234/v1"
-    /// Empty means the model the server has loaded.
+    /// Empty means the model the server has loaded. Needed when the server has several.
     public var model = ""
+    /// Advanced: the longest answer the model may write, in tokens.
+    public var maxTokens = 10_000
+
+    public static let maxTokensRange = 1_000...50_000
     /// `{to}` is replaced with the target language code, such as `ru` or `en`.
     public var prompt = HostSettings.defaultPrompt
 
@@ -37,10 +41,15 @@ public struct HostSettings: Codable, Equatable, Sendable {
 
     public init() {}
 
-    public var chatCompletionsURL: URL? {
+    public var chatCompletionsURL: URL? { endpoint("chat/completions") }
+
+    /// The models the server offers: `GET /v1/models`.
+    public var modelsURL: URL? { endpoint("models") }
+
+    private func endpoint(_ path: String) -> URL? {
         var base = baseURL.trimmingCharacters(in: .whitespacesAndNewlines)
         while base.hasSuffix("/") { base.removeLast() }
-        return URL(string: base + "/chat/completions")
+        return URL(string: base + "/" + path)
     }
 
     // A key missing from stored settings falls back to its default instead of dropping them all.
@@ -49,6 +58,7 @@ public struct HostSettings: Codable, Equatable, Sendable {
         let fallback = HostSettings()
         baseURL = try c.decodeIfPresent(String.self, forKey: .baseURL) ?? fallback.baseURL
         model = try c.decodeIfPresent(String.self, forKey: .model) ?? fallback.model
+        maxTokens = try c.decodeIfPresent(Int.self, forKey: .maxTokens) ?? fallback.maxTokens
         let stored = try c.decodeIfPresent(String.self, forKey: .prompt)
         prompt = stored == nil || stored == Self.previousDefaultPrompt ? fallback.prompt : stored!
     }
@@ -60,14 +70,11 @@ public struct DeveloperSettings: Codable, Equatable, Sendable {
     public var doubleCopyGapSeconds = 0.3
     /// Longer lines in the popup are wrapped at a word boundary; 0 turns wrapping off.
     public var maxLineLength = 160
-    /// The longest answer the model may write, in tokens.
-    public var maxTokens = 10_000
     /// The menu bar icon turns red while a translation request is running.
     public var highlightIconWhileTranslating = true
 
     public static let doubleCopyGapRange = 0.1...1.0
     public static let maxLineLengthRange = 0...400
-    public static let maxTokensRange = 1_000...50_000
 
     public init() {}
 
@@ -76,7 +83,6 @@ public struct DeveloperSettings: Codable, Equatable, Sendable {
         let fallback = DeveloperSettings()
         doubleCopyGapSeconds = try c.decodeIfPresent(Double.self, forKey: .doubleCopyGapSeconds) ?? fallback.doubleCopyGapSeconds
         maxLineLength = try c.decodeIfPresent(Int.self, forKey: .maxLineLength) ?? fallback.maxLineLength
-        maxTokens = try c.decodeIfPresent(Int.self, forKey: .maxTokens) ?? fallback.maxTokens
         highlightIconWhileTranslating = try c.decodeIfPresent(Bool.self, forKey: .highlightIconWhileTranslating)
             ?? fallback.highlightIconWhileTranslating
     }

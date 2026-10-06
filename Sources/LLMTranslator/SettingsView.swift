@@ -90,19 +90,36 @@ struct TranslationTab: View {
 struct HostForm: View {
     @Binding var host: HostSettings
 
+    /// What the server answered on /v1/models; nil until asked.
+    @State private var models: [String]?
+    @State private var modelsError: String?
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             FormRow(label: "Server URL") {
                 TextField("", text: $host.baseURL, prompt: Text("http://127.0.0.1:1234/v1"))
-                    .frame(width: 210)
+                    .frame(width: 230)
             }
             FormRow(label: "Model") {
                 TextField("", text: $host.model, prompt: Text("Loaded on the server"))
-                    .frame(width: 210)
+                    .frame(width: 196)
+                Menu {
+                    Button("Loaded on the server") { host.model = "" }
+                    if let models, !models.isEmpty {
+                        Divider()
+                        ForEach(models, id: \.self) { id in Button(id) { host.model = id } }
+                    }
+                } label: {
+                    Image(systemName: "list.bullet")
+                }
+                .menuStyle(.borderlessButton)
+                .fixedSize()
+                .help("Models the server offers")
             }
-            Text("Any OpenAI-compatible server: LM Studio, Ollama, llama.cpp.")
+            Text(modelsError ?? "Any OpenAI-compatible server: LM Studio, Ollama, llama.cpp. Pick a model when the server has several loaded.")
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(modelsError == nil ? Color.secondary : Color.red)
+                .fixedSize(horizontal: false, vertical: true)
 
             HStack {
                 Text("Prompt")
@@ -110,14 +127,33 @@ struct HostForm: View {
                 Button("Reset") { host.prompt = HostSettings.defaultPrompt }
                     .disabled(host.prompt == HostSettings.defaultPrompt)
             }
-            .padding(.top, 12)
+            .padding(.top, 10)
             TextEditor(text: $host.prompt)
                 .font(.system(.body, design: .monospaced))
-                .frame(minHeight: 120)
+                .frame(minHeight: 90)
                 .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color(nsColor: .separatorColor)))
             Text("{to} becomes the target language code, such as ru or en.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+
+            SectionHeader(title: "Advanced")
+            FormRow(label: "Max answer length") {
+                Stepper(value: $host.maxTokens, in: HostSettings.maxTokensRange, step: 1_000) {
+                    Text("\(host.maxTokens) tokens").monospacedDigit()
+                }
+            }
+        }
+        .task(id: host.baseURL) { await loadModels() }
+    }
+
+    private func loadModels() async {
+        do {
+            models = try await ModelList.fetch(from: host)
+            modelsError = nil
+        } catch is CancellationError {
+        } catch {
+            models = nil
+            modelsError = "No answer from the server at \(host.baseURL)."
         }
     }
 }
@@ -145,12 +181,6 @@ struct DeveloperTab: View {
                 }
             }
 
-            FormRow(label: "Max answer length") {
-                Stepper(value: $store.settings.developer.maxTokens,
-                        in: DeveloperSettings.maxTokensRange, step: 1_000) {
-                    Text("\(store.settings.developer.maxTokens) tokens").monospacedDigit()
-                }
-            }
             FormRow(label: "Red icon while translating") {
                 Toggle("", isOn: $store.settings.developer.highlightIconWhileTranslating)
                     .toggleStyle(.checkbox)
