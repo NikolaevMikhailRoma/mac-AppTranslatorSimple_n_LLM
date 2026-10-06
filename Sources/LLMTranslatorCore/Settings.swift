@@ -89,17 +89,6 @@ public struct HostSettings: Codable, Equatable, Sendable {
         return URL(string: base + "/" + path)
     }
 
-    // A key missing from stored settings falls back to its default instead of dropping them all.
-    public init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        let fallback = HostSettings()
-        baseURL = try c.decodeIfPresent(String.self, forKey: .baseURL) ?? fallback.baseURL
-        model = try c.decodeIfPresent(String.self, forKey: .model) ?? fallback.model
-        maxTokens = try c.decodeIfPresent(Int.self, forKey: .maxTokens) ?? fallback.maxTokens
-        let stored = try c.decodeIfPresent(String.self, forKey: .prompt)
-        prompt = stored.map { Self.previousDefaultPrompts.contains($0) ? fallback.prompt : $0 } ?? fallback.prompt
-        trimAnswer = try c.decodeIfPresent(Bool.self, forKey: .trimAnswer) ?? fallback.trimAnswer
-    }
 }
 
 /// Tuning a regular user never needs: the Developer tab.
@@ -122,16 +111,6 @@ public struct DeveloperSettings: Codable, Equatable, Sendable {
 
     public init() {}
 
-    public init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        let fallback = DeveloperSettings()
-        doubleCopyGapSeconds = try c.decodeIfPresent(Double.self, forKey: .doubleCopyGapSeconds) ?? fallback.doubleCopyGapSeconds
-        popupMaxWidth = try c.decodeIfPresent(Int.self, forKey: .popupMaxWidth) ?? fallback.popupMaxWidth
-        popupGrowth = try c.decodeIfPresent(Double.self, forKey: .popupGrowth) ?? fallback.popupGrowth
-        streamLLM = try c.decodeIfPresent(Bool.self, forKey: .streamLLM) ?? fallback.streamLLM
-        highlightIconWhileTranslating = try c.decodeIfPresent(Bool.self, forKey: .highlightIconWhileTranslating)
-            ?? fallback.highlightIconWhileTranslating
-    }
 }
 
 /// Everything the user can change in Settings. Stored as JSON in UserDefaults.
@@ -150,15 +129,15 @@ public struct Settings: Codable, Equatable, Sendable {
 
     public init() {}
 
-    public init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        let fallback = Settings()
-        method = (try? c.decodeIfPresent(TranslationMethod.self, forKey: .method)) ?? fallback.method
-        host = try c.decodeIfPresent(HostSettings.self, forKey: .host) ?? fallback.host
-        nativeLanguage = try c.decodeIfPresent(String.self, forKey: .nativeLanguage) ?? fallback.nativeLanguage
-        secondLanguage = try c.decodeIfPresent(String.self, forKey: .secondLanguage) ?? fallback.secondLanguage
-        joinBrokenLines = try c.decodeIfPresent(Bool.self, forKey: .joinBrokenLines) ?? fallback.joinBrokenLines
-        copyTranslation = try c.decodeIfPresent(Bool.self, forKey: .copyTranslation) ?? fallback.copyTranslation
-        developer = try c.decodeIfPresent(DeveloperSettings.self, forKey: .developer) ?? fallback.developer
+    /// Stored settings over the defaults. Unreadable data gives the defaults; an earlier default
+    /// prompt is upgraded to the current one, a prompt the user wrote is kept.
+    public static func decode(from data: Data) -> Settings {
+        guard var settings = try? SettingsCoding.decode(Settings.self, from: data, defaults: Settings()) else {
+            return Settings()
+        }
+        if HostSettings.previousDefaultPrompts.contains(settings.host.prompt) {
+            settings.host.prompt = HostSettings.defaultPrompt
+        }
+        return settings
     }
 }

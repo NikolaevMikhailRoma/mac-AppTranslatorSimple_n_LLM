@@ -19,12 +19,7 @@ final class SettingsStore {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        if let data = defaults.data(forKey: Self.key),
-           let stored = try? JSONDecoder().decode(Settings.self, from: data) {
-            self.settings = stored
-        } else {
-            self.settings = Settings()
-        }
+        self.settings = defaults.data(forKey: Self.key).map(Settings.decode(from:)) ?? Settings()
     }
 
     private func save() {
