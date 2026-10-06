@@ -9,7 +9,7 @@ enum ProviderFactory {
         case .host:
             var body = config.requestBody
             body.max_tokens = settings.host.maxTokens
-            return LLMProvider(host: settings.host, requestBody: body, trimsWhitespace: settings.trimTranslation)
+            return LLMProvider(host: settings.host, requestBody: body, trimsWhitespace: settings.host.trimAnswer)
         }
     }
 }

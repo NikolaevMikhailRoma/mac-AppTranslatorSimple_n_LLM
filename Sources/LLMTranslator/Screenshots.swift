@@ -39,7 +39,7 @@ enum Screenshots {
 
         let model = BubbleModel(header: "ru → en",
                                 source: "Привет! Спасибо за ответ.\nЗавтра пришлю файлы, а в четверг созвонимся.",
-                                trims: true, growth: 1.2, maxSize: CGSize(width: 640, height: 600))
+                                trims: false, growth: 1.2, maxSize: CGSize(width: 640, height: 600))
         model.append("Hi! Thanks for your reply.\nI'll send the files tomorrow, and we'll call on Thursday.")
         model.finish()
         let bubble = NSHostingView(rootView: TranslationBubble(model: model).padding(16))

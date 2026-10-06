@@ -79,7 +79,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // The popup opens with the first word, sized by the original; until then only the icon shows the work.
         let screen = NSScreen.main?.visibleFrame.size ?? CGSize(width: 1440, height: 900)
-        let model = BubbleModel(header: "\(source) → \(target)", source: src, trims: settings.trimTranslation,
+        let model = BubbleModel(header: "\(source) → \(target)", source: src, trims: settings.method == .host && settings.host.trimAnswer,
                                 growth: settings.developer.popupGrowth,
                                 maxSize: CGSize(width: CGFloat(settings.developer.popupMaxWidth),
                                                 height: screen.height * 0.6))

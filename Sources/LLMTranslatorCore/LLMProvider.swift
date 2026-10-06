@@ -8,7 +8,7 @@ public final class LLMProvider: TranslationProvider {
     private let apiKey: String?
     private let trimsWhitespace: Bool
 
-    public init(host: HostSettings, requestBody: RequestBody, trimsWhitespace: Bool = true,
+    public init(host: HostSettings, requestBody: RequestBody, trimsWhitespace: Bool = false,
                 apiKey: String? = nil, session: URLSession? = nil) {
         self.host = host
         self.requestBody = requestBody
@@ -144,7 +144,7 @@ public final class LLMProvider: TranslationProvider {
     // MARK: - Prompt construction
     func buildMessages(for text: String, from srcLang: String, to dstLang: String) -> [[String: String]] {
         // The source language is not sent: it is only a guess, and the model sees the text anyway.
-        let systemPrompt = host.prompt.replacingOccurrences(of: "{to}", with: dstLang)
+        let systemPrompt = host.renderedPrompt(target: dstLang)
 
         return [
             ["role": "system", "content": systemPrompt],

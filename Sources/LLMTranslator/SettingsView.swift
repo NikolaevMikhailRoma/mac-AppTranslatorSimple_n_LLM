@@ -58,7 +58,7 @@ struct GeneralTab: View {
                 .labelsHidden()
                 .frame(width: 180)
             }
-            Text("Mostly Cyrillic text is translated into language 2, anything else into language 1. Language 1 is only Russian for now.")
+            Text("Text is translated into language 1. If it is mostly Cyrillic, into language 2. Language 1 is only Russian for now.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -70,11 +70,6 @@ struct GeneralTab: View {
             }
             FormRow(label: "Copy the translation to the clipboard") {
                 Toggle("", isOn: $store.settings.copyTranslation)
-                    .toggleStyle(.checkbox)
-                    .labelsHidden()
-            }
-            FormRow(label: "Trim spaces and newlines around the translation") {
-                Toggle("", isOn: $store.settings.trimTranslation)
                     .toggleStyle(.checkbox)
                     .labelsHidden()
             }
@@ -105,7 +100,9 @@ struct TranslationTab: View {
             .frame(height: CGFloat(TranslationMethod.allCases.count) * (Self.rowHeight + 4) + 8)
 
             switch store.settings.method {
-            case .host: HostForm(host: $store.settings.host)
+            case .host: HostForm(host: $store.settings.host,
+                                 language1: store.settings.nativeLanguage,
+                                 language2: store.settings.secondLanguage)
             }
         }
     }
@@ -113,6 +110,13 @@ struct TranslationTab: View {
 
 struct HostForm: View {
     @Binding var host: HostSettings
+    /// From General, to show what the placeholder becomes.
+    let language1: String
+    let language2: String
+
+    private func firstLine(_ target: String) -> String {
+        host.renderedPrompt(target: target).split(separator: "\n").first.map(String.init) ?? ""
+    }
 
     /// What the server answered on /v1/models; nil until asked.
     @State private var models: [String]?
@@ -156,9 +160,17 @@ struct HostForm: View {
                 .font(.system(.body, design: .monospaced))
                 .frame(minHeight: 90)
                 .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color(nsColor: .separatorColor)))
-            Text("{to} becomes the target language code, such as ru or en.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            if host.promptNamesLanguage {
+                Text("\(HostSettings.placeholder) becomes the language code from General: \(language1) for most text, \(language2) for mostly Cyrillic text. The model gets, for example: “\(firstLine(language2))”")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                Text("The prompt has no \(HostSettings.placeholder): the model is not told which language to translate into.")
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
 
             SectionHeader(title: "Advanced")
             FormRow(label: "Max answer length, tokens", help: "The longest translation the model may write. A token is about ¾ of an English word or half a Russian one. The arrows step by powers of two; any number can be typed.") {
@@ -176,6 +188,12 @@ struct HostForm: View {
                     host.maxTokens = HostSettings.nextMaxTokens(after: host.maxTokens, up: false)
                 }
                 .labelsHidden()
+            }
+            FormRow(label: "Trim spaces and newlines around the answer",
+                    help: "Remove spaces and empty lines the model puts before and after the translation. Off by default: current models rarely add them.") {
+                Toggle("", isOn: $host.trimAnswer)
+                    .toggleStyle(.checkbox)
+                    .labelsHidden()
             }
         }
         .task(id: host.baseURL) { await loadModels() }

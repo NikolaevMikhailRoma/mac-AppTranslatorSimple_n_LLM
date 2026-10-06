@@ -27,9 +27,13 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(settings.nativeLanguage, "ru")
     }
 
-    func testDraftDefaultPromptIsUpgraded() throws {
-        let stored = try JSONEncoder().encode(["prompt": HostSettings.previousDefaultPrompt])
-        XCTAssertEqual(try JSONDecoder().decode(HostSettings.self, from: stored).prompt, HostSettings.defaultPrompt)
+    func testEarlierDefaultPromptsAreUpgraded() throws {
+        for old in HostSettings.previousDefaultPrompts {
+            let stored = try JSONEncoder().encode(["prompt": old])
+            XCTAssertEqual(try JSONDecoder().decode(HostSettings.self, from: stored).prompt, HostSettings.defaultPrompt)
+        }
+        let custom = try JSONEncoder().encode(["prompt": "Mine {to}"])
+        XCTAssertEqual(try JSONDecoder().decode(HostSettings.self, from: custom).prompt, "Mine {to}")
     }
 
     func testMaxTokensArrowsMoveByPowersOfTwo() {
@@ -211,8 +215,17 @@ final class LLMProviderTests: XCTestCase {
 
     func testCustomPromptGetsCodes() {
         var host = HostSettings()
-        host.prompt = "→{to}"
+        host.prompt = "→{language1/language2}"
         XCTAssertEqual(provider(host).buildMessages(for: "Hi", from: "en", to: "de")[0]["content"], "→de")
+        host.prompt = "old name {to}"
+        XCTAssertEqual(provider(host).buildMessages(for: "Hi", from: "en", to: "de")[0]["content"], "old name de")
+    }
+
+    func testPromptWithoutPlaceholderIsFlagged() {
+        var host = HostSettings()
+        XCTAssertTrue(host.promptNamesLanguage)
+        host.prompt = "Translate."
+        XCTAssertFalse(host.promptNamesLanguage)
     }
 
     func testPayloadCarriesBodyAndMessages() throws {
@@ -244,7 +257,8 @@ final class LLMProviderTests: XCTestCase {
     }
 
     func testExtractAnswerTrimsWhitespace() throws {
+        let p = LLMProvider(host: HostSettings(), requestBody: AppConfig.default.requestBody, trimsWhitespace: true)
         let data = Data(#"{"choices":[{"message":{"role":"assistant","content":"  Привет\n"}}]}"#.utf8)
-        XCTAssertEqual(try provider().extractAnswer(from: data), "Привет")
+        XCTAssertEqual(try p.extractAnswer(from: data), "Привет")
     }
 }

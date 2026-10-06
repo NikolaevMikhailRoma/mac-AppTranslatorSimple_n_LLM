@@ -38,21 +38,43 @@ public struct HostSettings: Codable, Equatable, Sendable {
         let next = up ? power : (power / 2 == value ? value / 2 : power / 2)
         return min(max(next, maxTokensRange.lowerBound), maxTokensRange.upperBound)
     }
-    /// `{to}` is replaced with the target language code, such as `ru` or `en`.
+    /// `{language1/language2}` is replaced with the target language code from General, such as `ru` or `en`.
     public var prompt = HostSettings.defaultPrompt
+    /// Advanced: drop spaces and newlines the model puts before and after the translation.
+    public var trimAnswer = false
+
+    public static let placeholder = "{language1/language2}"
 
     public static let defaultPrompt = """
-        Translate to {to}.
+        Translate to {language1/language2}.
         Preserve every character of formatting: spaces, newlines, tabs, punctuation, emojis, special symbols.
         Output ONLY the translation, nothing else.
         """
 
-    /// The 0.0.4 draft default; a stored copy of it is upgraded to `defaultPrompt`.
-    static let previousDefaultPrompt = """
+    /// Earlier defaults; a stored copy of one of them is upgraded to `defaultPrompt`.
+    static let previousDefaultPrompts = [
+        """
         Translate from {from} to {to}.
         Preserve every character of formatting: spaces, newlines, tabs, punctuation, emojis, special symbols.
         Output ONLY the translation, nothing else.
+        """,
         """
+        Translate to {to}.
+        Preserve every character of formatting: spaces, newlines, tabs, punctuation, emojis, special symbols.
+        Output ONLY the translation, nothing else.
+        """,
+    ]
+
+    /// The system prompt as the model gets it. `{to}` is the placeholder's old name and still works.
+    public func renderedPrompt(target: String) -> String {
+        prompt.replacingOccurrences(of: Self.placeholder, with: target)
+            .replacingOccurrences(of: "{to}", with: target)
+    }
+
+    /// Without the placeholder the model is not told which language to translate into.
+    public var promptNamesLanguage: Bool {
+        prompt.contains(Self.placeholder) || prompt.contains("{to}")
+    }
 
     public init() {}
 
@@ -75,7 +97,8 @@ public struct HostSettings: Codable, Equatable, Sendable {
         model = try c.decodeIfPresent(String.self, forKey: .model) ?? fallback.model
         maxTokens = try c.decodeIfPresent(Int.self, forKey: .maxTokens) ?? fallback.maxTokens
         let stored = try c.decodeIfPresent(String.self, forKey: .prompt)
-        prompt = stored == nil || stored == Self.previousDefaultPrompt ? fallback.prompt : stored!
+        prompt = stored.map { Self.previousDefaultPrompts.contains($0) ? fallback.prompt : $0 } ?? fallback.prompt
+        trimAnswer = try c.decodeIfPresent(Bool.self, forKey: .trimAnswer) ?? fallback.trimAnswer
     }
 }
 
@@ -121,8 +144,6 @@ public struct Settings: Codable, Equatable, Sendable {
     public var secondLanguage = "en"
     /// Before translating, glue lines broken by the layout (PDF, e-mail); any method.
     public var joinBrokenLines = true
-    /// Drop spaces and newlines the model puts before and after the translation.
-    public var trimTranslation = true
     /// Put the translation on the clipboard as soon as it arrives, without ⌘C in the popup.
     public var copyTranslation = false
     public var developer = DeveloperSettings()
@@ -137,7 +158,6 @@ public struct Settings: Codable, Equatable, Sendable {
         nativeLanguage = try c.decodeIfPresent(String.self, forKey: .nativeLanguage) ?? fallback.nativeLanguage
         secondLanguage = try c.decodeIfPresent(String.self, forKey: .secondLanguage) ?? fallback.secondLanguage
         joinBrokenLines = try c.decodeIfPresent(Bool.self, forKey: .joinBrokenLines) ?? fallback.joinBrokenLines
-        trimTranslation = try c.decodeIfPresent(Bool.self, forKey: .trimTranslation) ?? fallback.trimTranslation
         copyTranslation = try c.decodeIfPresent(Bool.self, forKey: .copyTranslation) ?? fallback.copyTranslation
         developer = try c.decodeIfPresent(DeveloperSettings.self, forKey: .developer) ?? fallback.developer
     }
