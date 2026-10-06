@@ -10,9 +10,12 @@ All notable changes, newest first. The format follows [Keep a Changelog](https:/
 - Server URL, model (picked from the server's list), prompt and maximum answer length in Settings.
 - Lines broken by a PDF or an e-mail are joined before translating; list items and sentence ends stay.
 - Optional: the translation goes to the clipboard on its own.
+- Text copied from a password manager (marked as concealed or transient on the clipboard) is not translated.
 - App icon.
 
 ### Changed
+- The popup is now a panel that takes the keyboard without switching apps: Esc closes it and ⌘C copies
+  without clicking it first; a click anywhere else closes it. It has no arrow any more.
 - The popup opens under the cursor, grows down and is cut to the text at the end; selecting or
   copying gives the text without extra line breaks, and a selection survives while text streams in.
 - The prompt names only the target language (`{language1/language2}`); `enable_thinking` is no longer sent.
