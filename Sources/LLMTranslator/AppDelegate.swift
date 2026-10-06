@@ -19,7 +19,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: Settings
     private let store = SettingsStore()
-    private let config = AppConfig.default
     private var settingsWindow: SettingsWindowController?
 
     // MARK: Services
@@ -72,7 +71,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let settings = store.settings
         let src = settings.joinBrokenLines ? LineJoiner.join(copied) : copied
         let translationService = TranslationService(
-            provider: ProviderFactory.createProvider(for: settings, config: config),
+            provider: ProviderFactory.createProvider(for: settings),
             languageDetector: LanguageDetector(native: settings.nativeLanguage, second: settings.secondLanguage)
         )
         let (source, target, pieces) = translationService.stream(src, streaming: settings.developer.streamLLM)
@@ -111,7 +110,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             } catch {
                 guard !Task.isCancelled else { return }
                 os_log("[AppDelegate] Translation failed: %@", type: .error, String(describing: error))
-                model.fail(ErrorMessage.text(for: error, serverURL: settings.host.baseURL))
+                model.fail(error.localizedDescription)
                 if popoverService.shownModel !== model { popoverService.show(model: model) }
                 popoverService.fitToContent()
             }

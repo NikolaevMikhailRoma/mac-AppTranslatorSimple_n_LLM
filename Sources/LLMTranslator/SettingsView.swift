@@ -115,7 +115,7 @@ struct HostForm: View {
     let language2: String
 
     private func firstLine(_ target: String) -> String {
-        host.renderedPrompt(target: target).split(separator: "\n").first.map(String.init) ?? ""
+        Prompt.render(host.prompt, target: target).split(separator: "\n").first.map(String.init) ?? ""
     }
 
     /// What the server answered on /v1/models; nil until asked.
@@ -152,21 +152,21 @@ struct HostForm: View {
             HStack {
                 Text("Prompt")
                 Spacer()
-                Button("Reset") { host.prompt = HostSettings.defaultPrompt }
-                    .disabled(host.prompt == HostSettings.defaultPrompt)
+                Button("Reset") { host.prompt = Prompt.standard }
+                    .disabled(host.prompt == Prompt.standard)
             }
             .padding(.top, 10)
             TextEditor(text: $host.prompt)
                 .font(.system(.body, design: .monospaced))
                 .frame(minHeight: 90)
                 .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color(nsColor: .separatorColor)))
-            if host.promptNamesLanguage {
-                Text("\(HostSettings.placeholder) becomes the language code from General: \(language1) for most text, \(language2) for mostly Cyrillic text. The model gets, for example: “\(firstLine(language2))”")
+            if Prompt.namesLanguage(host.prompt) {
+                Text("\(Prompt.placeholder) becomes the language code from General: \(language1) for most text, \(language2) for mostly Cyrillic text. The model gets, for example: “\(firstLine(language2))”")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             } else {
-                Text("The prompt has no \(HostSettings.placeholder): the model is not told which language to translate into.")
+                Text("The prompt has no \(Prompt.placeholder): the model is not told which language to translate into.")
                     .font(.caption)
                     .foregroundStyle(.orange)
                     .fixedSize(horizontal: false, vertical: true)
@@ -201,7 +201,7 @@ struct HostForm: View {
 
     private func loadModels() async {
         do {
-            models = try await ModelList.fetch(from: host)
+            models = try await OpenAIClient(baseURL: host.baseURL).models()
             modelsError = nil
         } catch is CancellationError {
         } catch {

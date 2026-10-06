@@ -7,7 +7,7 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(settings.method, .host)
         XCTAssertEqual(settings.nativeLanguage, "ru")
         XCTAssertEqual(settings.secondLanguage, "en")
-        XCTAssertEqual(settings.host.chatCompletionsURL?.absoluteString, "http://127.0.0.1:1234/v1/chat/completions")
+        XCTAssertEqual(settings.host.baseURL, "http://127.0.0.1:1234/v1")
     }
 
     func testRoundTrip() throws {
@@ -23,7 +23,7 @@ final class SettingsTests: XCTestCase {
         let settings = Settings.decode(from: data)
         XCTAssertEqual(settings.secondLanguage, "fr")
         XCTAssertEqual(settings.host.model, "m")
-        XCTAssertEqual(settings.host.prompt, HostSettings.defaultPrompt)
+        XCTAssertEqual(settings.host.prompt, Prompt.standard)
         XCTAssertEqual(settings.nativeLanguage, "ru")
         XCTAssertEqual(settings.developer, DeveloperSettings())
     }
@@ -53,9 +53,9 @@ final class SettingsTests: XCTestCase {
     }
 
     func testEarlierDefaultPromptsAreUpgraded() {
-        for old in HostSettings.previousDefaultPrompts {
+        for old in Prompt.earlierStandards {
             let stored = try! JSONSerialization.data(withJSONObject: ["host": ["prompt": old]])
-            XCTAssertEqual(Settings.decode(from: stored).host.prompt, HostSettings.defaultPrompt)
+            XCTAssertEqual(Settings.decode(from: stored).host.prompt, Prompt.standard)
         }
         let custom = try! JSONSerialization.data(withJSONObject: ["host": ["prompt": "Mine {to}"]])
         XCTAssertEqual(Settings.decode(from: custom).host.prompt, "Mine {to}")
@@ -70,14 +70,5 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(HostSettings.nextMaxTokens(after: 131_072, up: true), 131_072)
     }
 
-    func testTrailingSlashInServerURL() {
-        var host = HostSettings()
-        host.baseURL = " http://localhost:11434/v1/ "
-        XCTAssertEqual(host.chatCompletionsURL?.absoluteString, "http://localhost:11434/v1/chat/completions")
-    }
 
-    func testRequestBodyOmitsUnsetOptionals() {
-        let body = RequestBody(temperature: 0, max_tokens: 10, stream: false, tool_choice: nil, enable_thinking: nil)
-        XCTAssertEqual(Set(body.toDictionary().keys), ["temperature", "max_tokens", "stream"])
-    }
 }

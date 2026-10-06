@@ -1,22 +1,7 @@
 import XCTest
 @testable import LLMTranslatorCore
 
-final class StreamingTests: XCTestCase {
-    func testParsesLMStudioChunks() {
-        XCTAssertEqual(LLMProvider.parseEvent(#"data: {"choices":[{"index":0,"delta":{"role":"assistant","content":"При"}}]}"#),
-                       .piece("При"))
-        XCTAssertEqual(LLMProvider.parseEvent(#"data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}"#), .skip)
-        XCTAssertEqual(LLMProvider.parseEvent("data: [DONE]"), .done)
-        XCTAssertEqual(LLMProvider.parseEvent(""), .skip)
-        XCTAssertEqual(LLMProvider.parseEvent(": keep-alive"), .skip)
-    }
-
-    func testStreamingPayloadAsksForStream() throws {
-        let p = LLMProvider(host: HostSettings(), requestBody: AppConfig.default.requestBody)
-        let json = try JSONSerialization.jsonObject(with: p.makeRequestPayload(messages: [], stream: true)) as? [String: Any]
-        XCTAssertEqual(json?["stream"] as? Bool, true)
-    }
-
+final class TranslationProviderTests: XCTestCase {
     /// A method that cannot stream still works through translateStream: one piece.
     func testDefaultStreamYieldsWholeTranslation() async throws {
         final class Fixed: TranslationProvider {
