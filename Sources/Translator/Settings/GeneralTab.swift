@@ -37,7 +37,7 @@ struct GeneralTab: View {
             }
 
             SectionHeader(title: "Application")
-            Button("Quit LLMTranslator") { NSApp.terminate(nil) }
+            Button("Quit \(appName)") { NSApp.terminate(nil) }
         }
     }
 }

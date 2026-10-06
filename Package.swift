@@ -2,12 +2,12 @@
 import PackageDescription
 
 let package = Package(
-    name: "LLMTranslator",
+    name: "AppTranslatorSimple",
     platforms: [.macOS(.v15)],
     products: [
         // The app's name is set apart from the code's: it changes with the naming of the series,
         // the targets do not. Must match "name" in app.json (CFBundleExecutable).
-        .executable(name: "LLMTranslator", targets: ["Translator"]),
+        .executable(name: "AppTranslatorSimple", targets: ["Translator"]),
     ],
     targets: [
         // Settings, the translation pipeline, the methods' engines — no AppKit, imported by tests.

@@ -6,4 +6,4 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 swift build
-.build/debug/LLMTranslator --screenshots "${1:-assets}"
+.build/debug/AppTranslatorSimple --screenshots "${1:-assets}"

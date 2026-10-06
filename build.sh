@@ -3,7 +3,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-APP_NAME="LLMTranslator"
+APP_NAME="AppTranslatorSimple"
 BUNDLE="$APP_NAME.app"
 
 swift build -c release
@@ -26,6 +26,6 @@ if [ "$EXPECTED" != "$ACTUAL" ]; then
     echo "Version mismatch: app.json has $EXPECTED, bundle has $ACTUAL" >&2
     exit 1
 fi
-codesign --force --deep --sign - --entitlements LLMTranslator.entitlements "$BUNDLE"
+codesign --force --deep --sign - --entitlements "$APP_NAME.entitlements" "$BUNDLE"
 
 echo "Built $BUNDLE — run with: open $BUNDLE"

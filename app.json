@@ -1,5 +1,5 @@
 {
-  "name": "LLMTranslator",
+  "name": "AppTranslatorSimple",
   "version": "0.0.4",
   "bundleIdentifier": "com.nikolaev.llmtranslator"
 }

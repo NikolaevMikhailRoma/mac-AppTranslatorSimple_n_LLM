@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 import TranslatorCore
 
-/// `LLMTranslator --screenshots <folder>`: draws the Settings tabs and a translation popup into PNGs
+/// `AppTranslatorSimple --screenshots <folder>`: draws the Settings tabs and a translation popup into PNGs
 /// for the README, in the light and the dark appearance (`-dark` suffix). Rendered offscreen, so no
 /// Screen Recording permission is needed; default settings, so every run gives the same pictures.
 @MainActor
@@ -18,7 +18,7 @@ enum Screenshots {
         // Window appearance alone is not enough: some AppKit controls (the tab bar) draw in the app's appearance.
         NSApp.appearance = appearance
 
-        let suite = "LLMTranslator.screenshots"
+        let suite = "AppTranslatorSimple.screenshots"
         UserDefaults().removePersistentDomain(forName: suite)
         let store = SettingsStore(defaults: UserDefaults(suiteName: suite)!)
 

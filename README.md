@@ -1,4 +1,4 @@
-# LLMTranslator
+# AppTranslatorSimple
 
 <img src="assets/popup-dark.png" width="474" alt="Translation popup">
 
@@ -51,7 +51,7 @@ size — rarely needed).
 
 ## Run the app (users)
 
-1. Download `LLMTranslator.app.zip` from the [latest release](https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/releases/latest) and unzip it.
+1. Download `AppTranslatorSimple.app.zip` from the [latest release](https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/releases/latest) and unzip it.
 2. Move it wherever you like (e.g. Applications).
 3. First launch: right-click the app → **Open** (it's ad-hoc signed, not notarized by Apple, so Gatekeeper shows one warning before the app even starts — this is expected, click Open to proceed).
 4. Start an OpenAI-compatible server (LM Studio, Ollama, llama.cpp…) with a non-reasoning model loaded. Look for the icon in the menu bar; there is no window.
@@ -69,7 +69,7 @@ Requirements:
 git clone https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM.git
 cd mac-AppTranslatorSimple_n_LLM
 ./build.sh
-open LLMTranslator.app
+open AppTranslatorSimple.app
 ```
 
 Run the unit tests with `swift test` (pure logic lives in the
