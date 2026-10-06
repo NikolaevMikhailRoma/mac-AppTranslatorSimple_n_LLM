@@ -32,7 +32,7 @@ public struct AppConfig: Equatable, Sendable {
 
     public static let `default` = AppConfig(
         // max_tokens is replaced with the host's Advanced setting before sending.
-        requestBody: RequestBody(temperature: 0, max_tokens: 10_000, stream: false,
+        requestBody: RequestBody(temperature: 0, max_tokens: 8_192, stream: false,
                                  tool_choice: nil, enable_thinking: nil)
     )
 }

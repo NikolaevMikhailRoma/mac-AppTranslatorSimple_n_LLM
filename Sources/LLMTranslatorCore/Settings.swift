@@ -27,9 +27,17 @@ public struct HostSettings: Codable, Equatable, Sendable {
     /// Empty means the model the server has loaded. Needed when the server has several.
     public var model = ""
     /// Advanced: the longest answer the model may write, in tokens.
-    public var maxTokens = 10_000
+    public var maxTokens = 8_192
 
-    public static let maxTokensRange = 1_000...50_000
+    public static let maxTokensRange = 256...131_072
+
+    /// The arrows next to the field move between powers of two: 4096 → 8192, 6000 → 4096.
+    public static func nextMaxTokens(after value: Int, up: Bool) -> Int {
+        var power = 1
+        while power <= value { power *= 2 }   // the smallest power of two above value
+        let next = up ? power : (power / 2 == value ? value / 2 : power / 2)
+        return min(max(next, maxTokensRange.lowerBound), maxTokensRange.upperBound)
+    }
     /// `{to}` is replaced with the target language code, such as `ru` or `en`.
     public var prompt = HostSettings.defaultPrompt
 

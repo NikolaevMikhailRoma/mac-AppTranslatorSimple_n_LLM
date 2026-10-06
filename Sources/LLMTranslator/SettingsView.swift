@@ -142,10 +142,21 @@ struct HostForm: View {
                 .foregroundStyle(.secondary)
 
             SectionHeader(title: "Advanced")
-            FormRow(label: "Max answer length") {
-                Stepper(value: $host.maxTokens, in: HostSettings.maxTokensRange, step: 1_000) {
-                    Text("\(host.maxTokens) tokens").monospacedDigit()
+            FormRow(label: "Max answer length, tokens") {
+                TextField("", value: Binding(
+                    get: { host.maxTokens },
+                    set: { host.maxTokens = min(max($0, HostSettings.maxTokensRange.lowerBound),
+                                                HostSettings.maxTokensRange.upperBound) }
+                ), format: .number.grouping(.never))
+                    .multilineTextAlignment(.trailing)
+                    .monospacedDigit()
+                    .frame(width: 80)
+                Stepper("") {
+                    host.maxTokens = HostSettings.nextMaxTokens(after: host.maxTokens, up: true)
+                } onDecrement: {
+                    host.maxTokens = HostSettings.nextMaxTokens(after: host.maxTokens, up: false)
                 }
+                .labelsHidden()
             }
         }
         .task(id: host.baseURL) { await loadModels() }

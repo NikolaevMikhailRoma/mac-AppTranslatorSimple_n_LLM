@@ -32,6 +32,15 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(try JSONDecoder().decode(HostSettings.self, from: stored).prompt, HostSettings.defaultPrompt)
     }
 
+    func testMaxTokensArrowsMoveByPowersOfTwo() {
+        XCTAssertEqual(HostSettings.nextMaxTokens(after: 8_192, up: true), 16_384)
+        XCTAssertEqual(HostSettings.nextMaxTokens(after: 8_192, up: false), 4_096)
+        XCTAssertEqual(HostSettings.nextMaxTokens(after: 6_000, up: true), 8_192)
+        XCTAssertEqual(HostSettings.nextMaxTokens(after: 6_000, up: false), 4_096)
+        XCTAssertEqual(HostSettings.nextMaxTokens(after: 256, up: false), 256)
+        XCTAssertEqual(HostSettings.nextMaxTokens(after: 131_072, up: true), 131_072)
+    }
+
     func testTrailingSlashInServerURL() {
         var host = HostSettings()
         host.baseURL = " http://localhost:11434/v1/ "
@@ -126,7 +135,7 @@ final class LLMProviderTests: XCTestCase {
 
         XCTAssertEqual(json["temperature"] as? Double, 0)
         XCTAssertNil(json["enable_thinking"], "not sent: Qwen does not honour it reliably")
-        XCTAssertEqual(json["max_tokens"] as? Int, 10_000)
+        XCTAssertEqual(json["max_tokens"] as? Int, 8_192)
         XCTAssertNil(json["model"], "an empty model means the one loaded on the server")
         let sent = try XCTUnwrap(json["messages"] as? [[String: String]])
         XCTAssertEqual(sent.map { $0["role"] }, ["system", "user"])
