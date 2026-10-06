@@ -21,7 +21,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let store = store
         let clipboard = ClipboardService { store.settings.developer.doubleCopyGapSeconds }
-        let popup = PopoverService(focusService: FocusService(), keyboardService: KeyboardService())
+        let popup = PopupService(keyboard: KeyboardService())
         let translation = TranslationController(store: store, clipboard: clipboard, popup: popup)
         let statusItem = StatusItemController(
             highlightsWhileBusy: { store.settings.developer.highlightIconWhileTranslating },

@@ -1,9 +1,11 @@
 import AppKit
 
-/// A service to handle keyboard events, specifically for copying text from the popover.
+/// Keys pressed in the popup: ⌘C copies, Esc closes. A local monitor sees only the app's own
+/// key events, so no Accessibility permission is needed.
 @MainActor
 final class KeyboardService {
     private var keyMonitor: Any?
+    var onEscape: (() -> Void)?
 
     /// Starts monitoring for the Command+C key combination.
     ///
@@ -16,7 +18,11 @@ final class KeyboardService {
         // Ensure any previous monitor is removed before starting a new one.
         stopMonitoring()
 
-        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            if event.keyCode == 53 {    // Esc
+                MainActor.assumeIsolated { self?.onEscape?() }
+                return nil
+            }
             // Check for Command + C
             if event.modifierFlags.contains(.command),
                event.charactersIgnoringModifiers?.lowercased() == "c" {

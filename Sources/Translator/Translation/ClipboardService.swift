@@ -1,4 +1,5 @@
 import AppKit
+import TranslatorCore
 
 /// A service that monitors the clipboard for double-copy gestures.
 @MainActor
@@ -44,6 +45,13 @@ final class ClipboardService {
 
     private func pollClipboard() {
         guard pasteboard.changeCount != lastChangeCount else { return }
+
+        // A password from a password manager: not a copy for translation, and it breaks a pair.
+        if ClipboardPrivacy.isPrivate(types: pasteboard.types?.map(\.rawValue) ?? []) {
+            lastChangeCount = pasteboard.changeCount
+            lastCopyTime = .distantPast
+            return
+        }
 
         let now = Date()
         if now.timeIntervalSince(lastCopyTime) <= doubleCopyGap() {

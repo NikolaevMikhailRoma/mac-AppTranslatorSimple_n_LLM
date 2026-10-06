@@ -7,7 +7,7 @@ import TranslatorCore
 final class TranslationController {
     private let store: SettingsStore
     private let clipboard: ClipboardService
-    private let popup: PopoverService
+    private let popup: PopupService
 
     /// True while at least one request is running; a new ⌘C C can start before the last one ends.
     var onBusyChange: ((Bool) -> Void)?
@@ -17,7 +17,7 @@ final class TranslationController {
     private var current: Task<Void, Never>?
     private var currentModel: BubbleModel?
 
-    init(store: SettingsStore, clipboard: ClipboardService, popup: PopoverService) {
+    init(store: SettingsStore, clipboard: ClipboardService, popup: PopupService) {
         self.store = store
         self.clipboard = clipboard
         self.popup = popup
