@@ -4,16 +4,21 @@ import PackageDescription
 let package = Package(
     name: "LLMTranslator",
     platforms: [.macOS(.v15)],
+    products: [
+        // The app's name is set apart from the code's: it changes with the naming of the series,
+        // the targets do not. Must match "name" in app.json (CFBundleExecutable).
+        .executable(name: "LLMTranslator", targets: ["Translator"]),
+    ],
     targets: [
-        // Config, language detection, prompt and API client — no AppKit, imported by tests.
-        .target(name: "LLMTranslatorCore"),
+        // Settings, the translation pipeline, the methods' engines — no AppKit, imported by tests.
+        .target(name: "TranslatorCore"),
         .executableTarget(
-            name: "LLMTranslator",
-            dependencies: ["LLMTranslatorCore"]
+            name: "Translator",
+            dependencies: ["TranslatorCore"]
         ),
         .testTarget(
-            name: "LLMTranslatorTests",
-            dependencies: ["LLMTranslatorCore"]
+            name: "TranslatorCoreTests",
+            dependencies: ["TranslatorCore"]
         ),
     ]
 )

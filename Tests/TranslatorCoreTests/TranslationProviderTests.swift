@@ -1,5 +1,5 @@
 import XCTest
-@testable import LLMTranslatorCore
+@testable import TranslatorCore
 
 final class TranslationProviderTests: XCTestCase {
     /// A method that cannot stream still works through translateStream: one piece.

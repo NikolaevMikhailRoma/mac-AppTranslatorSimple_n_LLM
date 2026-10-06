@@ -1,5 +1,5 @@
 import SwiftUI
-import LLMTranslatorCore
+import TranslatorCore
 
 /// The list of translation methods on top, the selected one's settings below.
 struct TranslationTab: View {

@@ -1,9 +1,6 @@
 # LLMTranslator
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/popup-dark.png">
-  <img src="assets/popup.png" width="474" alt="Translation popup">
-</picture>
+<img src="assets/popup-dark.png" width="474" alt="Translation popup">
 
 A minimal native macOS menu bar translator. Copy text twice (⌘C C) and the
 translation pops up next to the cursor. No Dock icon, no main window.
@@ -47,9 +44,9 @@ Translation (method, server, model, prompt) and Developer (timings and popup
 size — rarely needed).
 
 <p>
-  <img src="assets/settings-general.png" width="32%" alt="Settings: General">
-  <img src="assets/settings-translation.png" width="32%" alt="Settings: Translation">
-  <img src="assets/settings-developer.png" width="32%" alt="Settings: Developer">
+  <img src="assets/settings-general-dark.png" width="32%" alt="Settings: General">
+  <img src="assets/settings-translation-dark.png" width="32%" alt="Settings: Translation">
+  <img src="assets/settings-developer-dark.png" width="32%" alt="Settings: Developer">
 </p>
 
 ## Run the app (users)
@@ -76,7 +73,7 @@ open LLMTranslator.app
 ```
 
 Run the unit tests with `swift test` (pure logic lives in the
-`LLMTranslatorCore` target). `Scripts/screenshots.sh` redraws the pictures in
+`TranslatorCore` target). `Scripts/screenshots.sh` redraws the pictures in
 `assets/`, light and dark.
 
 ## Version history

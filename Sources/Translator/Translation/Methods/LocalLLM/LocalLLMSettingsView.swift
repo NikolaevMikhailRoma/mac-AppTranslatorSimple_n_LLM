@@ -1,5 +1,5 @@
 import SwiftUI
-import LLMTranslatorCore
+import TranslatorCore
 
 struct LocalLLMSettingsView: View {
     @Binding var settings: LocalLLMSettings

@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import LLMTranslatorCore
+import TranslatorCore
 
 /// `LLMTranslator --screenshots <folder>`: draws the Settings tabs and a translation popup into PNGs
 /// for the README, in the light and the dark appearance (`-dark` suffix). Rendered offscreen, so no

@@ -1,5 +1,5 @@
 import SwiftUI
-import LLMTranslatorCore
+import TranslatorCore
 
 struct GeneralTab: View {
     @Bindable var store: SettingsStore

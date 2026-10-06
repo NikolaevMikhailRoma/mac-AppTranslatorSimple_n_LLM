@@ -6,7 +6,7 @@
                              LanguageDetector     (target code only)   SSE pieces → StreamedText
 ```
 
-Read before changing the LLM path. Logic: `Sources/LLMTranslatorCore` (no AppKit, tested); screen: `Sources/LLMTranslator/Translation`.
+Read before changing the LLM path. Logic: `Sources/TranslatorCore` (no AppKit, tested); screen: `Sources/Translator/Translation`.
 
 - **Direction:** mostly Cyrillic → language 2, anything else → language 1. The app decides, not the model.
 - **Prompt:** from Settings, `{language1/language2}` → target code (`ru`, `en`); English whatever the languages. No source language: it is a guess and the model sees the text.

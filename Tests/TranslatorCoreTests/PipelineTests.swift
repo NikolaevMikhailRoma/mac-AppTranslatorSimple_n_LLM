@@ -1,5 +1,5 @@
 import XCTest
-@testable import LLMTranslatorCore
+@testable import TranslatorCore
 
 final class StreamedTextTests: XCTestCase {
     func testKeepsEverythingByDefault() {

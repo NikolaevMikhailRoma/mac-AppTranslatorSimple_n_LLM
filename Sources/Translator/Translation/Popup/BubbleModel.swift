@@ -1,6 +1,6 @@
 import Foundation
 import Observation
-import LLMTranslatorCore
+import TranslatorCore
 
 /// What the popup shows; filled piece by piece while the model writes.
 @MainActor

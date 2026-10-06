@@ -1,5 +1,5 @@
 import XCTest
-@testable import LLMTranslatorCore
+@testable import TranslatorCore
 
 final class LanguageDetectorTests: XCTestCase {
     private let detector = LanguageDetector(language1: "ru", language2: "en")

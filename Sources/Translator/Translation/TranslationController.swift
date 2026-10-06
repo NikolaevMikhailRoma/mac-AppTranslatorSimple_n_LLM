@@ -1,5 +1,5 @@
 import AppKit
-import LLMTranslatorCore
+import TranslatorCore
 
 /// One ⌘C C from start to end: runs the pipeline, opens the popup with the first word, fills it,
 /// copies the result if asked. A new ⌘C C or closing the popup cancels the translation on screen.

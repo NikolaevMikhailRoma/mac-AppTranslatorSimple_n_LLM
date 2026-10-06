@@ -1,6 +1,6 @@
 import Foundation
 import Observation
-import LLMTranslatorCore
+import TranslatorCore
 
 /// What the user set in Settings, kept as one JSON value in UserDefaults.
 @MainActor

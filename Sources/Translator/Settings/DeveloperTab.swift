@@ -1,5 +1,5 @@
 import SwiftUI
-import LLMTranslatorCore
+import TranslatorCore
 
 /// Tuning a regular user never needs.
 struct DeveloperTab: View {
