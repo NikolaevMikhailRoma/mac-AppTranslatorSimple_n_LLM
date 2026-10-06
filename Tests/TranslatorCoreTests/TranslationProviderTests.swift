@@ -5,7 +5,7 @@ final class TranslationProviderTests: XCTestCase {
     /// A method that cannot stream still works through translateStream: one piece.
     func testDefaultStreamYieldsWholeTranslation() async throws {
         final class Fixed: TranslationProvider {
-            func translate(text: String, from: String, to: String) async throws -> String { "whole" }
+            func translate(text: String, from: String?, to: String) async throws -> String { "whole" }
         }
         var pieces: [String] = []
         for try await piece in Fixed().translateStream(text: "x", from: "ru", to: "en") { pieces.append(piece) }
@@ -14,8 +14,8 @@ final class TranslationProviderTests: XCTestCase {
 
     func testOnceGivesOnePieceEvenForAStreamingProvider() async throws {
         final class Chunky: TranslationProvider {
-            func translate(text: String, from: String, to: String) async throws -> String { "ab" }
-            func translateStream(text: String, from: String, to: String) -> AsyncThrowingStream<String, Error> {
+            func translate(text: String, from: String?, to: String) async throws -> String { "ab" }
+            func translateStream(text: String, from: String?, to: String) -> AsyncThrowingStream<String, Error> {
                 AsyncThrowingStream { $0.yield("a"); $0.yield("b"); $0.finish() }
             }
         }

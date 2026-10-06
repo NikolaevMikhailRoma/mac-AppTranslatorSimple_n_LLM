@@ -30,11 +30,11 @@ final class TranslationController {
     func translateClipboard() {
         guard let copied = NSPasteboard.general.string(forType: .string), !copied.isEmpty else { return }
         let settings = store.settings
-        let job = TranslationPipeline.start(copied, settings: settings)
+        let job = TranslationPipeline.start(copied, settings: settings, provider: settings.method.makeProvider(settings))
 
         // The popup opens with the first word, sized by the original; until then only the icon shows the work.
         let screen = NSScreen.main?.visibleFrame.size ?? CGSize(width: 1440, height: 900)
-        let model = BubbleModel(header: "\(job.source) → \(job.target)", source: job.text, trims: job.trimsAnswer,
+        let model = BubbleModel(header: "\(job.source ?? "auto") → \(job.target)", source: job.text, trims: job.trimsAnswer,
                                 growth: settings.developer.popupGrowth,
                                 maxSize: CGSize(width: CGFloat(settings.developer.popupMaxWidth),
                                                 height: screen.height * 0.6))

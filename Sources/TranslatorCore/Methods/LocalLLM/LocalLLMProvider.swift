@@ -13,14 +13,13 @@ public final class LocalLLMProvider: TranslationProvider {
         self.client = client ?? OpenAIClient(baseURL: settings.baseURL)
     }
 
-    public func translate(text: String, from sourceLanguageCode: String, to targetLanguageCode: String) async throws -> String {
-        try await client.complete(body(for: text, to: targetLanguageCode, stream: false))
+    public func translate(text: String, from source: String?, to target: String) async throws -> String {
+        try await client.complete(body(for: text, to: target, stream: false))
     }
 
-    public func translateStream(text: String, from sourceLanguageCode: String, to targetLanguageCode: String)
-        -> AsyncThrowingStream<String, Error> {
+    public func translateStream(text: String, from source: String?, to target: String) -> AsyncThrowingStream<String, Error> {
         do {
-            return client.stream(try body(for: text, to: targetLanguageCode, stream: true))
+            return client.stream(try body(for: text, to: target, stream: true))
         } catch {
             return AsyncThrowingStream { $0.finish(throwing: error) }
         }

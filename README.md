@@ -54,7 +54,7 @@ size — rarely needed).
 1. Download `LLMTranslator.app.zip` from the [latest release](https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/releases/latest) and unzip it.
 2. Move it wherever you like (e.g. Applications).
 3. First launch: right-click the app → **Open** (it's ad-hoc signed, not notarized by Apple, so Gatekeeper shows one warning before the app even starts — this is expected, click Open to proceed).
-4. Start an OpenAI-compatible server (e.g. LM Studio) with a non-reasoning model loaded. Look for the icon in the menu bar; there is no window.
+4. Start an OpenAI-compatible server (LM Studio, Ollama, llama.cpp…) with a non-reasoning model loaded. Look for the icon in the menu bar; there is no window.
 
 ## Build from source (developers)
 
@@ -63,7 +63,7 @@ All the source is in this repo and safe to review — no third-party dependencie
 Requirements:
 - macOS 15+
 - Xcode Command Line Tools (provides `swift`, `codesign`) — install with `xcode-select --install` if `swift --version` doesn't work yet
-- An OpenAI-compatible server with a non-reasoning model loaded
+- An OpenAI-compatible server (LM Studio, Ollama, llama.cpp…) with a non-reasoning model loaded
 
 ```
 git clone https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM.git
