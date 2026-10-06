@@ -112,6 +112,8 @@ public struct Settings: Codable, Equatable, Sendable {
     public var nativeLanguage = "ru"
     /// Language 2: the target for text in language 1.
     public var secondLanguage = "en"
+    /// Before translating, glue lines broken by the layout (PDF, e-mail); any method.
+    public var joinBrokenLines = true
     /// Drop spaces and newlines the model puts before and after the translation.
     public var trimTranslation = true
     /// Put the translation on the clipboard as soon as it arrives, without ⌘C in the popup.
@@ -127,6 +129,7 @@ public struct Settings: Codable, Equatable, Sendable {
         host = try c.decodeIfPresent(HostSettings.self, forKey: .host) ?? fallback.host
         nativeLanguage = try c.decodeIfPresent(String.self, forKey: .nativeLanguage) ?? fallback.nativeLanguage
         secondLanguage = try c.decodeIfPresent(String.self, forKey: .secondLanguage) ?? fallback.secondLanguage
+        joinBrokenLines = try c.decodeIfPresent(Bool.self, forKey: .joinBrokenLines) ?? fallback.joinBrokenLines
         trimTranslation = try c.decodeIfPresent(Bool.self, forKey: .trimTranslation) ?? fallback.trimTranslation
         copyTranslation = try c.decodeIfPresent(Bool.self, forKey: .copyTranslation) ?? fallback.copyTranslation
         developer = try c.decodeIfPresent(DeveloperSettings.self, forKey: .developer) ?? fallback.developer

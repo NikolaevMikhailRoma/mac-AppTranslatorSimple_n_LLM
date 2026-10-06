@@ -54,6 +54,11 @@ struct GeneralTab: View {
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .fixedSize(horizontal: false, vertical: true)
+            FormRow(label: "Join lines broken by PDF or e-mail") {
+                Toggle("", isOn: $store.settings.joinBrokenLines)
+                    .toggleStyle(.checkbox)
+                    .labelsHidden()
+            }
             FormRow(label: "Copy the translation to the clipboard") {
                 Toggle("", isOn: $store.settings.copyTranslation)
                     .toggleStyle(.checkbox)

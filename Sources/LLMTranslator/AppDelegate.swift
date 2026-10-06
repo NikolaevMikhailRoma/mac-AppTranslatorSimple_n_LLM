@@ -55,8 +55,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: Event Handling
     private func handleDoubleCopy() {
-        guard let src = NSPasteboard.general.string(forType: .string), !src.isEmpty else { return }
+        guard let copied = NSPasteboard.general.string(forType: .string), !copied.isEmpty else { return }
         let settings = store.settings
+        let src = settings.joinBrokenLines ? LineJoiner.join(copied) : copied
         let translationService = TranslationService(
             provider: ProviderFactory.createProvider(for: settings, config: config),
             languageDetector: LanguageDetector(native: settings.nativeLanguage, second: settings.secondLanguage)
