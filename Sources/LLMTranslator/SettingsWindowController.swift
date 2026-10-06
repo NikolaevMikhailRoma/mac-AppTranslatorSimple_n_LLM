@@ -8,7 +8,7 @@ final class SettingsWindowController {
     let window: NSWindow
 
     /// Fits the tallest tab, so switching tabs never resizes the window.
-    private static let size = NSSize(width: 620, height: 500)
+    private static let size = NSSize(width: 520, height: 540)
 
     init(store: SettingsStore) {
         window = NSWindow(

@@ -11,6 +11,13 @@ public enum TranslationMethod: String, Codable, CaseIterable, Identifiable, Send
         case .host: return "Local LLM / own host"
         }
     }
+
+    /// SF Symbol shown next to the title in Settings.
+    public var symbol: String {
+        switch self {
+        case .host: return "cpu"
+        }
+    }
 }
 
 /// Any OpenAI-compatible Chat Completions server: LM Studio, Ollama, llama.cpp and the like.
