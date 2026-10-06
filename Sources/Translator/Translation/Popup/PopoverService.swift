@@ -5,6 +5,9 @@ import SwiftUI
 final class PopoverService: NSObject, NSPopoverDelegate {
     // MARK: Properties
     private let popover = NSPopover()
+    /// Clicks in other apps. `.transient` closes the popover on an outside click only while this app
+    /// is active, and macOS 14+ rarely lets a background app activate itself after ⌘C C.
+    private var outsideClickMonitor: Any?
     private var anchorWin: NSWindow?
 
     // MARK: Dependencies
@@ -78,6 +81,18 @@ final class PopoverService: NSObject, NSPopoverDelegate {
 
         // 6. Start monitoring for Cmd+C.
         keyboardService.startMonitoring { model.text }
+
+        // Mouse events from other apps need no Accessibility permission (key events would).
+        if outsideClickMonitor == nil {
+            outsideClickMonitor = NSEvent.addGlobalMonitorForEvents(
+                matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]
+            ) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    log.info("outside click, closing popover")
+                    self?.popover.performClose(nil)
+                }
+            }
+        }
     }
 
     /// The popover resizes itself through `sizingOptions`; this only logs the result once SwiftUI has laid it out.
@@ -93,6 +108,10 @@ final class PopoverService: NSObject, NSPopoverDelegate {
         anchorWin?.orderOut(nil)
         focusService.restorePreviousFocus()
         keyboardService.stopMonitoring()
+        if let outsideClickMonitor {
+            NSEvent.removeMonitor(outsideClickMonitor)
+            self.outsideClickMonitor = nil
+        }
         onClose?(shownModel)
         shownModel = nil
     }
