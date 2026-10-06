@@ -111,7 +111,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             } catch {
                 guard !Task.isCancelled else { return }
                 os_log("[AppDelegate] Translation failed: %@", type: .error, String(describing: error))
-                model.fail(String(describing: error))
+                model.fail(ErrorMessage.text(for: error, serverURL: settings.host.baseURL))
                 if popoverService.shownModel !== model { popoverService.show(model: model) }
                 popoverService.fitToContent()
             }

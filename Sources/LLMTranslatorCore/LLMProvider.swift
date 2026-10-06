@@ -111,7 +111,7 @@ public final class LLMProvider: TranslationProvider {
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
             throw NSError(domain: "LLMProvider", code: statusCode,
-                          userInfo: [NSLocalizedDescriptionKey: "The API endpoint is not reachable or returned an error. Status: \(statusCode)"])
+                          userInfo: [NSLocalizedDescriptionKey: "The server at \(host.baseURL) answered with HTTP \(statusCode). Check the server URL and the model in Settings."])
         }
     }
 
