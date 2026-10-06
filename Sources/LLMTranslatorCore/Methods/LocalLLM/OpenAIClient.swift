@@ -58,7 +58,7 @@ public struct OpenAIClient: Sendable {
                     for try await line in bytes.lines {
                         switch Self.parseEvent(line) {
                         case .piece(let piece): continuation.yield(piece)
-                        case .done: continuation.finish(); return
+                        case .done: continuation.finish()    // keep reading until the server closes, so nothing is cancelled
                         case .skip: continue
                         }
                     }
@@ -67,7 +67,10 @@ public struct OpenAIClient: Sendable {
                     continuation.finish(throwing: explained(error))
                 }
             }
-            continuation.onTermination = { _ in task.cancel() }
+            // Only a reader that gave up (a new ⌘C C, a closed popup) stops the request.
+            continuation.onTermination = { termination in
+                if case .cancelled = termination { task.cancel() }
+            }
         }
     }
 
