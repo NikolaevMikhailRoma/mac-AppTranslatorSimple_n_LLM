@@ -54,6 +54,11 @@ struct GeneralTab: View {
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .fixedSize(horizontal: false, vertical: true)
+            FormRow(label: "Trim spaces and newlines around the translation") {
+                Toggle("", isOn: $store.settings.trimTranslation)
+                    .toggleStyle(.checkbox)
+                    .labelsHidden()
+            }
 
             SectionHeader(title: "Application")
             Button("Quit LLMTranslator") { NSApp.terminate(nil) }
@@ -110,7 +115,7 @@ struct HostForm: View {
                 .font(.system(.body, design: .monospaced))
                 .frame(minHeight: 120)
                 .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color(nsColor: .separatorColor)))
-            Text("{from} and {to} become language codes, such as ru and en.")
+            Text("{to} becomes the target language code, such as ru or en.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -140,6 +145,12 @@ struct DeveloperTab: View {
                 }
             }
 
+            FormRow(label: "Max answer length") {
+                Stepper(value: $store.settings.developer.maxTokens,
+                        in: DeveloperSettings.maxTokensRange, step: 1_000) {
+                    Text("\(store.settings.developer.maxTokens) tokens").monospacedDigit()
+                }
+            }
             FormRow(label: "Red icon while translating") {
                 Toggle("", isOn: $store.settings.developer.highlightIconWhileTranslating)
                     .toggleStyle(.checkbox)

@@ -6,10 +6,13 @@ public final class LLMProvider: TranslationProvider {
     private let host: HostSettings
     private let requestBody: RequestBody
     private let apiKey: String?
+    private let trimsWhitespace: Bool
 
-    public init(host: HostSettings, requestBody: RequestBody, apiKey: String? = nil, session: URLSession? = nil) {
+    public init(host: HostSettings, requestBody: RequestBody, trimsWhitespace: Bool = true,
+                apiKey: String? = nil, session: URLSession? = nil) {
         self.host = host
         self.requestBody = requestBody
+        self.trimsWhitespace = trimsWhitespace
         self.apiKey = apiKey
         if let session = session {
             self.session = session
@@ -68,7 +71,7 @@ public final class LLMProvider: TranslationProvider {
             throw NSError(domain: "LLMProvider", code: 2,
                           userInfo: [NSLocalizedDescriptionKey: "Empty response from language model"])
         }
-        return raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimsWhitespace ? raw.trimmingCharacters(in: .whitespacesAndNewlines) : raw
     }
 
     // MARK: - Payload builder
@@ -86,9 +89,8 @@ public final class LLMProvider: TranslationProvider {
 
     // MARK: - Prompt construction
     func buildMessages(for text: String, from srcLang: String, to dstLang: String) -> [[String: String]] {
-        let systemPrompt = host.prompt
-            .replacingOccurrences(of: "{from}", with: srcLang)
-            .replacingOccurrences(of: "{to}", with: dstLang)
+        // The source language is not sent: it is only a guess, and the model sees the text anyway.
+        let systemPrompt = host.prompt.replacingOccurrences(of: "{to}", with: dstLang)
 
         return [
             ["role": "system", "content": systemPrompt],

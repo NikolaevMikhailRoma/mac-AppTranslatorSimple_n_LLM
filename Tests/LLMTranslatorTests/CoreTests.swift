@@ -27,6 +27,11 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(settings.nativeLanguage, "ru")
     }
 
+    func testDraftDefaultPromptIsUpgraded() throws {
+        let stored = try JSONEncoder().encode(["prompt": HostSettings.previousDefaultPrompt])
+        XCTAssertEqual(try JSONDecoder().decode(HostSettings.self, from: stored).prompt, HostSettings.defaultPrompt)
+    }
+
     func testTrailingSlashInServerURL() {
         var host = HostSettings()
         host.baseURL = " http://localhost:11434/v1/ "
@@ -91,7 +96,7 @@ final class LLMProviderTests: XCTestCase {
     func testDefaultPromptIsUnchanged() {
         let messages = provider().buildMessages(for: "Hi", from: "en", to: "ru")
         XCTAssertEqual(messages[0]["content"], """
-            Translate from en to ru.
+            Translate to ru.
             Preserve every character of formatting: spaces, newlines, tabs, punctuation, emojis, special symbols.
             Output ONLY the translation, nothing else.
             """)
@@ -99,8 +104,8 @@ final class LLMProviderTests: XCTestCase {
 
     func testCustomPromptGetsCodes() {
         var host = HostSettings()
-        host.prompt = "{from}→{to}"
-        XCTAssertEqual(provider(host).buildMessages(for: "Hi", from: "en", to: "de")[0]["content"], "en→de")
+        host.prompt = "→{to}"
+        XCTAssertEqual(provider(host).buildMessages(for: "Hi", from: "en", to: "de")[0]["content"], "→de")
     }
 
     func testPayloadCarriesBodyAndMessages() throws {
@@ -109,7 +114,8 @@ final class LLMProviderTests: XCTestCase {
         let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
 
         XCTAssertEqual(json["temperature"] as? Double, 0)
-        XCTAssertEqual(json["enable_thinking"] as? Bool, false)
+        XCTAssertNil(json["enable_thinking"], "not sent: Qwen does not honour it reliably")
+        XCTAssertEqual(json["max_tokens"] as? Int, 10_000)
         XCTAssertNil(json["model"], "an empty model means the one loaded on the server")
         let sent = try XCTUnwrap(json["messages"] as? [[String: String]])
         XCTAssertEqual(sent.map { $0["role"] }, ["system", "user"])
@@ -122,6 +128,12 @@ final class LLMProviderTests: XCTestCase {
         let p = provider(host)
         let json = try JSONSerialization.jsonObject(with: p.makeRequestPayload(messages: [])) as? [String: Any]
         XCTAssertEqual(json?["model"] as? String, "qwen/qwen3.5-9b")
+    }
+
+    func testExtractAnswerKeepsWhitespaceWhenAsked() throws {
+        let p = LLMProvider(host: HostSettings(), requestBody: AppConfig.default.requestBody, trimsWhitespace: false)
+        let data = Data(#"{"choices":[{"message":{"role":"assistant","content":"  Привет\n"}}]}"#.utf8)
+        XCTAssertEqual(try p.extractAnswer(from: data), "  Привет\n")
     }
 
     func testExtractAnswerTrimsWhitespace() throws {

@@ -7,7 +7,9 @@ enum ProviderFactory {
     static func createProvider(for settings: Settings, config: AppConfig) -> TranslationProvider {
         switch settings.method {
         case .host:
-            return LLMProvider(host: settings.host, requestBody: config.requestBody)
+            var body = config.requestBody
+            body.max_tokens = settings.developer.maxTokens
+            return LLMProvider(host: settings.host, requestBody: body, trimsWhitespace: settings.trimTranslation)
         }
     }
 }

@@ -31,7 +31,8 @@ public struct AppConfig: Equatable, Sendable {
     public var requestBody: RequestBody
 
     public static let `default` = AppConfig(
-        requestBody: RequestBody(temperature: 0, max_tokens: 1024, stream: false,
-                                 tool_choice: nil, enable_thinking: false)
+        // max_tokens is replaced with the Developer setting before sending.
+        requestBody: RequestBody(temperature: 0, max_tokens: 10_000, stream: false,
+                                 tool_choice: nil, enable_thinking: nil)
     )
 }
