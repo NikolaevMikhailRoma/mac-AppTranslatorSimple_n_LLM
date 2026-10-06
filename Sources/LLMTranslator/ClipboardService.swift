@@ -21,6 +21,13 @@ final class ClipboardService {
         self.lastCopyTime = Date()
     }
 
+    /// Puts our own text on the clipboard without it counting as the user's copy.
+    func write(_ text: String) {
+        pasteboard.clearContents()
+        pasteboard.setString(text, forType: .string)
+        lastChangeCount = pasteboard.changeCount
+    }
+
     /// Starts monitoring the clipboard.
     func startMonitoring() {
         guard timer == nil else { return }

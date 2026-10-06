@@ -66,16 +66,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             defer { runningRequests -= 1 }
             do {
                 let tuple = try await translationService.translate(src)
-                let prefix = "\(tuple.source) -> \(tuple.target)\n"
                 await MainActor.run {
-                    popoverService.show(text: prefix + tuple.result, maxLineLength: settings.developer.maxLineLength)
+                    if settings.copyTranslation {
+                        clipboardService.write(tuple.result)
+                    }
+                    popoverService.show(header: "\(tuple.source) → \(tuple.target)", text: tuple.result,
+                                        maxWidth: CGFloat(settings.developer.popupMaxWidth))
                 }
             } catch {
                 os_log("[AppDelegate] Translation failed: %@", type: .error, String(describing: error))
                 // Optionally, show an error in the popover
                 await MainActor.run {
-                    popoverService.show(text: "Translation Error:\n\(String(describing: error))",
-                                        maxLineLength: settings.developer.maxLineLength)
+                    popoverService.show(header: "Translation error", text: String(describing: error),
+                                        maxWidth: CGFloat(settings.developer.popupMaxWidth))
                 }
             }
         }
@@ -85,8 +88,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func buildStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let btn = statusItem.button {
-            btn.image = NSImage(systemSymbolName: "translate",
-                                accessibilityDescription: "Translator")
+            btn.image = Self.idleIcon
             let menu = NSMenu()
             menu.addItem(withTitle: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
             menu.addItem(.separator())
@@ -98,8 +100,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Red while the model works, the usual menu bar colour otherwise.
     private func updateStatusIcon() {
         let busy = runningRequests > 0 && store.settings.developer.highlightIconWhileTranslating
-        statusItem.button?.contentTintColor = busy ? .systemRed : nil
+        // The menu bar ignores contentTintColor on template images (it turns black),
+        // so the busy state swaps in a coloured, non-template copy of the symbol.
+        statusItem.button?.image = busy ? Self.busyIcon : Self.idleIcon
     }
+
+    private static let idleIcon: NSImage? = {
+        let image = NSImage(systemSymbolName: "translate", accessibilityDescription: "Translator")
+        image?.isTemplate = true
+        return image
+    }()
+
+    private static let busyIcon: NSImage? = {
+        let image = NSImage(systemSymbolName: "translate", accessibilityDescription: "Translating")?
+            .withSymbolConfiguration(.init(paletteColors: [.systemRed]))
+        image?.isTemplate = false
+        return image
+    }()
 
     @objc private func openSettings() {
         if settingsWindow == nil {

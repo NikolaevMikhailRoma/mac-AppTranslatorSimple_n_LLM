@@ -83,13 +83,14 @@ public struct HostSettings: Codable, Equatable, Sendable {
 public struct DeveloperSettings: Codable, Equatable, Sendable {
     /// Two copies closer than this count as ⌘C C.
     public var doubleCopyGapSeconds = 0.3
-    /// Longer lines in the popup are wrapped at a word boundary; 0 turns wrapping off.
-    public var maxLineLength = 160
+    /// The popup grows with the text up to this width in points, then wraps it on screen only:
+    /// no newline is added to what gets copied or selected.
+    public var popupMaxWidth = 640
     /// The menu bar icon turns red while a translation request is running.
     public var highlightIconWhileTranslating = true
 
     public static let doubleCopyGapRange = 0.1...1.0
-    public static let maxLineLengthRange = 0...400
+    public static let popupMaxWidthRange = 320...1_200
 
     public init() {}
 
@@ -97,7 +98,7 @@ public struct DeveloperSettings: Codable, Equatable, Sendable {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         let fallback = DeveloperSettings()
         doubleCopyGapSeconds = try c.decodeIfPresent(Double.self, forKey: .doubleCopyGapSeconds) ?? fallback.doubleCopyGapSeconds
-        maxLineLength = try c.decodeIfPresent(Int.self, forKey: .maxLineLength) ?? fallback.maxLineLength
+        popupMaxWidth = try c.decodeIfPresent(Int.self, forKey: .popupMaxWidth) ?? fallback.popupMaxWidth
         highlightIconWhileTranslating = try c.decodeIfPresent(Bool.self, forKey: .highlightIconWhileTranslating)
             ?? fallback.highlightIconWhileTranslating
     }
@@ -113,6 +114,8 @@ public struct Settings: Codable, Equatable, Sendable {
     public var secondLanguage = "en"
     /// Drop spaces and newlines the model puts before and after the translation.
     public var trimTranslation = true
+    /// Put the translation on the clipboard as soon as it arrives, without ⌘C in the popup.
+    public var copyTranslation = false
     public var developer = DeveloperSettings()
 
     public init() {}
@@ -125,6 +128,7 @@ public struct Settings: Codable, Equatable, Sendable {
         nativeLanguage = try c.decodeIfPresent(String.self, forKey: .nativeLanguage) ?? fallback.nativeLanguage
         secondLanguage = try c.decodeIfPresent(String.self, forKey: .secondLanguage) ?? fallback.secondLanguage
         trimTranslation = try c.decodeIfPresent(Bool.self, forKey: .trimTranslation) ?? fallback.trimTranslation
+        copyTranslation = try c.decodeIfPresent(Bool.self, forKey: .copyTranslation) ?? fallback.copyTranslation
         developer = try c.decodeIfPresent(DeveloperSettings.self, forKey: .developer) ?? fallback.developer
     }
 }

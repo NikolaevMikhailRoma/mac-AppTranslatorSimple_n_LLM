@@ -54,6 +54,11 @@ struct GeneralTab: View {
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .fixedSize(horizontal: false, vertical: true)
+            FormRow(label: "Copy the translation to the clipboard") {
+                Toggle("", isOn: $store.settings.copyTranslation)
+                    .toggleStyle(.checkbox)
+                    .labelsHidden()
+            }
             FormRow(label: "Trim spaces and newlines around the translation") {
                 Toggle("", isOn: $store.settings.trimTranslation)
                     .toggleStyle(.checkbox)
@@ -188,12 +193,10 @@ struct DeveloperTab: View {
                     .monospacedDigit()
                     .frame(width: 52, alignment: .trailing)
             }
-            FormRow(label: "Wrap lines longer than") {
-                Stepper(value: $store.settings.developer.maxLineLength,
-                        in: DeveloperSettings.maxLineLengthRange, step: 10) {
-                    Text(store.settings.developer.maxLineLength == 0
-                         ? "off" : "\(store.settings.developer.maxLineLength) chars")
-                        .monospacedDigit()
+            FormRow(label: "Popup max width") {
+                Stepper(value: $store.settings.developer.popupMaxWidth,
+                        in: DeveloperSettings.popupMaxWidthRange, step: 40) {
+                    Text("\(store.settings.developer.popupMaxWidth) pt").monospacedDigit()
                 }
             }
 

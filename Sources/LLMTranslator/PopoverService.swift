@@ -26,12 +26,11 @@ final class PopoverService: NSObject, NSPopoverDelegate {
 
     /// Shows the popover with the provided text.
     /// - Parameters:
-    ///   - text: The text to display in the popover.
-    ///   - maxLineLength: Longer lines are wrapped; 0 or nil leaves them alone.
-    func show(text: String, maxLineLength: Int?) {
+    ///   - header: A small grey line above the text, not copied.
+    ///   - text: The text to display, and what ⌘C copies when nothing is selected.
+    ///   - maxWidth: Wider text wraps on screen only.
+    func show(header: String?, text: String, maxWidth: CGFloat) {
         os_log("[PopoverService] will-show popover")
-
-        let wrappedText = TextWrap.wrap(text, maxLength: maxLineLength)
 
         // 1. Create a 1x1 anchor window at the mouse position.
         let pt = NSEvent.mouseLocation
@@ -61,7 +60,9 @@ final class PopoverService: NSObject, NSPopoverDelegate {
         anchorWin?.orderFront(nil)
 
         // 4. Set up the SwiftUI view and size the popover.
-        let host = NSHostingController(rootView: TranslationBubble(text: wrappedText))
+        let bubble = TranslationBubble(header: header, text: text,
+                                       width: TranslationBubble.width(for: text, maxWidth: maxWidth))
+        let host = NSHostingController(rootView: bubble)
         host.view.layoutSubtreeIfNeeded()
         popover.contentViewController = host
         popover.contentSize = host.view.fittingSize
@@ -75,7 +76,7 @@ final class PopoverService: NSObject, NSPopoverDelegate {
         os_log("[PopoverService] did-show popover")
 
         // 6. Start monitoring for Cmd+C.
-        keyboardService.startMonitoring(for: wrappedText)
+        keyboardService.startMonitoring(for: text)
     }
 
     // MARK: NSPopoverDelegate

@@ -93,21 +93,6 @@ final class LanguageDetectorTests: XCTestCase {
     }
 }
 
-final class TextWrapTests: XCTestCase {
-    func testNilOrZeroLeavesTextAlone() {
-        XCTAssertEqual(TextWrap.wrap("a b c", maxLength: nil), "a b c")
-        XCTAssertEqual(TextWrap.wrap("a b c", maxLength: 0), "a b c")
-    }
-
-    func testBreaksAtWordBoundary() {
-        XCTAssertEqual(TextWrap.wrap("aaa bbb ccc", maxLength: 7), "aaa bbb\nccc")
-    }
-
-    func testKeepsExistingNewlines() {
-        XCTAssertEqual(TextWrap.wrap("one\n\ntwo", maxLength: 3), "one\n\ntwo")
-    }
-}
-
 final class LLMProviderTests: XCTestCase {
     private func provider(_ host: HostSettings = HostSettings()) -> LLMProvider {
         LLMProvider(host: host, requestBody: AppConfig.default.requestBody)
