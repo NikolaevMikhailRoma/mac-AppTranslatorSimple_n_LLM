@@ -1,37 +1,54 @@
-# LLMTranslator_mac
+# LLMTranslator
 
-Menu-bar macOS app. Press ⌘ C C → instant EN↔RU translation bubble. Language choosing automatic.
+A minimal native macOS menu bar translator. Copy text twice (⌘C C) and the
+translation pops up next to the cursor. No Dock icon, no main window.
 
-- Monitors clipboard; shows SwiftUI pop-over at cursor.
-- Calls local LLM via LM Studio API on 127.0.0.1:1234.
+## Features
 
-## Requires
+- Popup at the cursor on ⌘C C. ⌘C inside the popup copies the translation.
+- The translation direction is picked automatically: Russian → English,
+  English → Russian.
+- Privacy: no analytics, nothing is collected. Text goes only to the
+  translation service you set up. Per-method privacy details: not implemented yet.
+- On-device: with a local model the text never leaves your Mac (except when
+  you point the app at a remote host).
 
-- macOS 13+ on Apple Silicon (GPU)
-- Xcode 15 / Swift 5.9
-- LM Studio running with an open-source model
+## Translation methods
 
-## Entitlements
+| Method | Status |
+| --- | --- |
+| Local LLM or your own host — any OpenAI-compatible Chat Completions API | ✅ |
+| Google Translate API | not implemented |
+| DeepL API | not implemented |
+| Claude subscription | not implemented |
+| macOS built-in Translation | not implemented |
 
-- `com.apple.security.network.client` – HTTP to localhost
-- `com.apple.security.automation.apple-events` – restore focus
-- Sandbox clipboard read (no extra entitlement needed)
+The app talks to `http://127.0.0.1:1234` (LM Studio's default port). Choosing
+the host and port in Settings is not implemented yet.
 
-## Project structure
+## Build from source (developers)
+
+All the source is in this repo and safe to review — no third-party dependencies, only Apple's own frameworks.
+
+Requirements:
+- macOS 15+
+- Xcode Command Line Tools (provides `swift`, `codesign`) — install with `xcode-select --install` if `swift --version` doesn't work yet
+- An OpenAI-compatible server on port 1234 with a non-reasoning model loaded
 
 ```
-LLMTranslator_mac/
-  Bubble/
-    TranslationBubble.swift                 # UI bubble view
-  Translation/
-    TranslationService.swift                # High-level service: text → text
-    TranslationProvider.swift               # Translation provider protocol
-    LanguageDetector.swift                  # Automatic language detection
-    ClipboardService.swift                  # Clipboard monitoring
-  Provider/
-    LLMProvider.swift                       # LLM API provider
-  Config.swift                              # App configuration
-  ClipTranslatorApp.swift                   # App entry point
-  AppDelegate.swift                         # Menu-bar, clipboard and popover logic
-  settings.json                             # Runtime configuration
+git clone https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM.git
+cd mac-AppTranslatorSimple_n_LLM
+./build.sh
+open LLMTranslator.app
 ```
+
+Run the unit tests with `swift test` (pure logic lives in the
+`LLMTranslatorCore` target).
+
+## Version history
+
+0.0.3 is the third implementation; the first two were never released.
+
+## License
+
+MIT — use it however you like.
