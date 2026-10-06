@@ -1,0 +1,41 @@
+import Foundation
+
+/// A way to get a translation, as Settings lists it. What runs it, the `TranslationProvider`,
+/// is made by the app: some engines (the system translator) need a window to work in.
+///
+/// Adding a method: a case here; if it has settings, a struct in `Methods/<Name>/` and a field
+/// in `Settings`; in the app, its provider and its panel under `Translation/Methods/<Name>/`.
+/// The compiler points at every `switch` that needs the new case.
+public enum TranslationMethod: String, Codable, CaseIterable, Identifiable, Sendable {
+    /// Stored as "host", its name before 0.0.4's refactoring.
+    case localLLM = "host"
+    case appleTranslation = "apple"
+
+    public var id: Self { self }
+
+    /// What Settings lists. macOS Translation works but is a prototype, not offered yet.
+    public static let offered: [TranslationMethod] = [.localLLM]
+
+    public var title: String {
+        switch self {
+        case .localLLM: return "Local LLM / own host"
+        case .appleTranslation: return "macOS Translation"
+        }
+    }
+
+    /// SF Symbol shown next to the title in Settings.
+    public var symbol: String {
+        switch self {
+        case .localLLM: return "cpu"
+        case .appleTranslation: return "apple.logo"
+        }
+    }
+
+    /// Whether spaces and newlines around the answer are dropped (the LLM's Advanced setting).
+    func trimsAnswer(_ settings: Settings) -> Bool {
+        switch self {
+        case .localLLM: return settings.localLLM.trimAnswer
+        case .appleTranslation: return false
+        }
+    }
+}

@@ -3,7 +3,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-APP_NAME="LLMTranslator"
+APP_NAME="AppTranslatorSimple"
 BUNDLE="$APP_NAME.app"
 
 swift build -c release
@@ -12,9 +12,6 @@ rm -rf "$BUNDLE"
 mkdir -p "$BUNDLE/Contents/MacOS" "$BUNDLE/Contents/Resources"
 cp ".build/release/$APP_NAME" "$BUNDLE/Contents/MacOS/$APP_NAME"
 cp Info.plist "$BUNDLE/Contents/Info.plist"
-
-# settings.json is read via Bundle.main from Contents/Resources.
-cp Resources/settings.json "$BUNDLE/Contents/Resources/settings.json"
 
 if [ -f Resources/AppIcon.icns ]; then
     cp Resources/AppIcon.icns "$BUNDLE/Contents/Resources/AppIcon.icns"
@@ -29,6 +26,6 @@ if [ "$EXPECTED" != "$ACTUAL" ]; then
     echo "Version mismatch: app.json has $EXPECTED, bundle has $ACTUAL" >&2
     exit 1
 fi
-codesign --force --deep --sign - --entitlements LLMTranslator.entitlements "$BUNDLE"
+codesign --force --deep --sign - --entitlements "$APP_NAME.entitlements" "$BUNDLE"
 
 echo "Built $BUNDLE — run with: open $BUNDLE"
