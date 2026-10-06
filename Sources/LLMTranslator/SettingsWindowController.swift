@@ -6,6 +6,7 @@ import SwiftUI
 @MainActor
 final class SettingsWindowController {
     let window: NSWindow
+    let tabs = NSTabView()
 
     /// Fits the tallest tab, so switching tabs never resizes the window.
     private static let size = NSSize(width: 520, height: 540)
@@ -20,7 +21,6 @@ final class SettingsWindowController {
         window.title = "Settings"
         window.isReleasedWhenClosed = false
 
-        let tabs = NSTabView()
         tabs.addTabViewItem(Self.tab("General", GeneralTab(store: store)))
         tabs.addTabViewItem(Self.tab("Translation", TranslationTab(store: store)))
         tabs.addTabViewItem(Self.tab("Developer", DeveloperTab(store: store)))

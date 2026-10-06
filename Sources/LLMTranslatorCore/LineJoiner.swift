@@ -1,7 +1,8 @@
 import Foundation
 
 /// Before translating: glue lines that were broken only by the layout (PDF, e-mail, terminal),
-/// so the translator gets whole sentences. Blank lines between paragraphs and list items stay.
+/// so the translator gets whole sentences. A layout break falls inside a sentence; a line that
+/// ends a sentence, blank lines between paragraphs and list items stay as they are.
 public enum LineJoiner {
     public static func join(_ text: String) -> String {
         let normalized = text.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
@@ -20,7 +21,7 @@ public enum LineJoiner {
                 continue
             }
 
-            if previousWasText && !startsListItem(trimmed) {
+            if previousWasText && !startsListItem(trimmed) && !endsSentence(result) {
                 if endsWithBrokenWord(result) {
                     // "экс-" + "порт" → "экспорт", but "Нью-" + "Йорк" → "Нью-Йорк".
                     if trimmed.first?.isLowercase == true { result.removeLast() }
@@ -41,6 +42,13 @@ public enum LineJoiner {
     /// "- item", "• item", "* item", "1. item", "2) item".
     static func startsListItem(_ line: String) -> Bool {
         line.wholeMatch(of: /(?:[-•*–—]|\d{1,3}[.)])\s.*/) != nil
+    }
+
+    /// The line so far ends with . ! ? : ; … (closing quotes or brackets after them are fine).
+    static func endsSentence(_ text: String) -> Bool {
+        let tail = text.reversed().drop { "\"'»”)]".contains($0) }
+        guard let last = tail.first else { return false }
+        return ".!?:;…".contains(last)
     }
 
     /// A letter followed by a hyphen at the very end: a word split across lines.

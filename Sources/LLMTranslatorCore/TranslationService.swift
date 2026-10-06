@@ -21,10 +21,14 @@ public final class TranslationService: Sendable {
         return (sourceLang, targetLang, result)
     }
 
-    /// Same, but the translation arrives in pieces.
-    public func stream(_ text: String) -> (source: String, target: String, pieces: AsyncThrowingStream<String, Error>) {
+    /// Same, but the translation arrives in pieces; with `streaming` off, in one piece at the end.
+    public func stream(_ text: String, streaming: Bool = true)
+        -> (source: String, target: String, pieces: AsyncThrowingStream<String, Error>) {
         let (sourceLang, targetLang) = languageDetector.determineLanguageDirection(for: text)
-        return (sourceLang, targetLang, provider.translateStream(text: text, from: sourceLang, to: targetLang))
+        let pieces = streaming
+            ? provider.translateStream(text: text, from: sourceLang, to: targetLang)
+            : provider.translateOnce(text: text, from: sourceLang, to: targetLang)
+        return (sourceLang, targetLang, pieces)
     }
 }
 

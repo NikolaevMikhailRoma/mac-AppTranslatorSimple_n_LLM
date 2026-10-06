@@ -24,14 +24,14 @@ final class PopoverService: NSObject, NSPopoverDelegate {
         popover.delegate = self
     }
 
-    /// Called when the popover closes, e.g. to stop a translation nobody will see.
-    var onClose: (() -> Void)?
+    /// Called with the model that was on screen when the popover closes, e.g. to stop a translation nobody will see.
+    var onClose: ((BubbleModel?) -> Void)?
+    private(set) var shownModel: BubbleModel?
+    private var host: NSHostingController<TranslationBubble>?
 
     /// Shows the popover at the mouse; `model` keeps filling it after this returns.
-    /// - Parameters:
-    ///   - model: The text to display, and what ⌘C copies when nothing is selected.
-    ///   - size: The text area, estimated up front.
-    func show(model: BubbleModel, size: CGSize) {
+    /// - Parameter model: The text to display, and what ⌘C copies when nothing is selected.
+    func show(model: BubbleModel) {
         os_log("[PopoverService] will-show popover")
 
         // 1. Create a 1x1 anchor window at the mouse position.
@@ -62,7 +62,11 @@ final class PopoverService: NSObject, NSPopoverDelegate {
         anchorWin?.orderFront(nil)
 
         // 4. Set up the SwiftUI view and size the popover.
-        let host = NSHostingController(rootView: TranslationBubble(model: model, size: size))
+        let host = NSHostingController(rootView: TranslationBubble(model: model))
+        // The popover follows the view's size: estimated while streaming, fitted when finished.
+        host.sizingOptions = .preferredContentSize
+        self.host = host
+        shownModel = model
         host.view.layoutSubtreeIfNeeded()
         popover.contentViewController = host
         popover.contentSize = host.view.fittingSize
@@ -71,12 +75,21 @@ final class PopoverService: NSObject, NSPopoverDelegate {
         popover.show(
             relativeTo: anchorWin!.contentView!.bounds,
             of: anchorWin!.contentView!,
-            preferredEdge: .maxY
+            preferredEdge: .minY   // below the cursor, so growing height moves only the bottom edge
         )
-        os_log("[PopoverService] did-show popover")
+        os_log("[PopoverService] did-show popover %.0fx%.0f", popover.contentSize.width, popover.contentSize.height)
 
         // 6. Start monitoring for Cmd+C.
         keyboardService.startMonitoring { model.text }
+    }
+
+    /// The popover resizes itself through `sizingOptions`; this only logs the result once SwiftUI has laid it out.
+    func fitToContent() {
+        let before = popover.contentSize
+        DispatchQueue.main.async { [popover] in
+            os_log("[PopoverService] fit %.0fx%.0f -> %.0fx%.0f", before.width, before.height,
+                   popover.contentSize.width, popover.contentSize.height)
+        }
     }
 
     // MARK: NSPopoverDelegate
@@ -85,6 +98,7 @@ final class PopoverService: NSObject, NSPopoverDelegate {
         anchorWin?.orderOut(nil)
         focusService.restorePreviousFocus()
         keyboardService.stopMonitoring()
-        onClose?()
+        onClose?(shownModel)
+        shownModel = nil
     }
 }

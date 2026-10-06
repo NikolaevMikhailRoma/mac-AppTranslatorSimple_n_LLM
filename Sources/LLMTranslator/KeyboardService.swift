@@ -21,9 +21,9 @@ final class KeyboardService {
             if event.modifierFlags.contains(.command),
                event.charactersIgnoringModifiers?.lowercased() == "c" {
 
-                // 1. Try standard copy action first (for selected text).
-                // If a responder (like NSTextView) handles it, it returns true.
-                if NSApp.sendAction(#selector(NSText.copy(_:)), to: nil, from: nil) {
+                // 1. Text selected in the popup: copy just that.
+                if let textView = event.window?.firstResponder as? NSTextView, textView.selectedRange().length > 0 {
+                    textView.copy(nil)
                     return nil // Event handled, consume it.
                 }
 

@@ -86,11 +86,16 @@ public struct DeveloperSettings: Codable, Equatable, Sendable {
     /// The popup grows with the text up to this width in points, then wraps it on screen only:
     /// no newline is added to what gets copied or selected.
     public var popupMaxWidth = 640
+    /// The popup opens at the original's size × this, before the translation's real size is known.
+    public var popupGrowth = 1.2
+    /// LLM answers arrive word by word. Off: the popup appears with the whole translation at once.
+    public var streamLLM = true
     /// The menu bar icon turns red while a translation request is running.
     public var highlightIconWhileTranslating = true
 
     public static let doubleCopyGapRange = 0.1...1.0
     public static let popupMaxWidthRange = 320...1_200
+    public static let popupGrowthRange = 1.0...2.0
 
     public init() {}
 
@@ -99,6 +104,8 @@ public struct DeveloperSettings: Codable, Equatable, Sendable {
         let fallback = DeveloperSettings()
         doubleCopyGapSeconds = try c.decodeIfPresent(Double.self, forKey: .doubleCopyGapSeconds) ?? fallback.doubleCopyGapSeconds
         popupMaxWidth = try c.decodeIfPresent(Int.self, forKey: .popupMaxWidth) ?? fallback.popupMaxWidth
+        popupGrowth = try c.decodeIfPresent(Double.self, forKey: .popupGrowth) ?? fallback.popupGrowth
+        streamLLM = try c.decodeIfPresent(Bool.self, forKey: .streamLLM) ?? fallback.streamLLM
         highlightIconWhileTranslating = try c.decodeIfPresent(Bool.self, forKey: .highlightIconWhileTranslating)
             ?? fallback.highlightIconWhileTranslating
     }

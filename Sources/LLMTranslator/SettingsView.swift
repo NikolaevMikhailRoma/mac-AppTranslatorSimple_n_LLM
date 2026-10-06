@@ -4,11 +4,20 @@ import LLMTranslatorCore
 /// Caption on the left, control pushed to the right.
 struct FormRow<Content: View>: View {
     let label: String
+    /// Shown as a tooltip on a small ⓘ after the label.
+    var help: String? = nil
     @ViewBuilder let content: () -> Content
 
     var body: some View {
         HStack(spacing: 12) {
-            Text(label)
+            HStack(spacing: 4) {
+                Text(label)
+                if let help {
+                    Image(systemName: "questionmark.circle")
+                        .foregroundStyle(.secondary)
+                        .help(help)
+                }
+            }
             Spacer(minLength: 12)
             content()
         }
@@ -54,7 +63,7 @@ struct GeneralTab: View {
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .fixedSize(horizontal: false, vertical: true)
-            FormRow(label: "Join lines broken by PDF or e-mail") {
+            FormRow(label: "Join lines broken by PDF or e-mail", help: "Before translating, lines broken in the middle of a sentence are joined. Lines ending a sentence, blank lines and list items stay.") {
                 Toggle("", isOn: $store.settings.joinBrokenLines)
                     .toggleStyle(.checkbox)
                     .labelsHidden()
@@ -152,7 +161,7 @@ struct HostForm: View {
                 .foregroundStyle(.secondary)
 
             SectionHeader(title: "Advanced")
-            FormRow(label: "Max answer length, tokens") {
+            FormRow(label: "Max answer length, tokens", help: "The longest translation the model may write. A token is about ¾ of an English word or half a Russian one. The arrows step by powers of two; any number can be typed.") {
                 TextField("", value: Binding(
                     get: { host.maxTokens },
                     set: { host.maxTokens = min(max($0, HostSettings.maxTokensRange.lowerBound),
@@ -190,7 +199,7 @@ struct DeveloperTab: View {
 
     var body: some View {
         VStack(spacing: 4) {
-            FormRow(label: "⌘C C interval") {
+            FormRow(label: "⌘C C interval", help: "Two copies closer than this count as ⌘C C. Too short and a slow double press is missed; too long and two separate copies trigger a translation.") {
                 Slider(value: $store.settings.developer.doubleCopyGapSeconds,
                        in: DeveloperSettings.doubleCopyGapRange, step: 0.05)
                     .frame(width: 180)
@@ -198,14 +207,27 @@ struct DeveloperTab: View {
                     .monospacedDigit()
                     .frame(width: 52, alignment: .trailing)
             }
-            FormRow(label: "Popup max width") {
+            FormRow(label: "Popup max width", help: "The popup grows with the text up to this width, then wraps lines on screen. Copying never adds line breaks.") {
                 Stepper(value: $store.settings.developer.popupMaxWidth,
                         in: DeveloperSettings.popupMaxWidthRange, step: 40) {
                     Text("\(store.settings.developer.popupMaxWidth) pt").monospacedDigit()
                 }
             }
 
-            FormRow(label: "Red icon while translating") {
+            FormRow(label: "Popup size × original", help: "Before the translation arrives, the popup is sized as the original text times this. If the translation is longer, the popup grows down; when it ends, empty space is cut.") {
+                Slider(value: $store.settings.developer.popupGrowth,
+                       in: DeveloperSettings.popupGrowthRange, step: 0.1)
+                    .frame(width: 180)
+                Text(String(format: "%.1f", store.settings.developer.popupGrowth))
+                    .monospacedDigit()
+                    .frame(width: 52, alignment: .trailing)
+            }
+            FormRow(label: "Stream LLM answers", help: "On: the popup opens with the first word and fills as the model writes. Off: it opens once the whole translation is ready.") {
+                Toggle("", isOn: $store.settings.developer.streamLLM)
+                    .toggleStyle(.checkbox)
+                    .labelsHidden()
+            }
+            FormRow(label: "Red icon while translating", help: "The menu bar icon turns red while a request to the model is running.") {
                 Toggle("", isOn: $store.settings.developer.highlightIconWhileTranslating)
                     .toggleStyle(.checkbox)
                     .labelsHidden()

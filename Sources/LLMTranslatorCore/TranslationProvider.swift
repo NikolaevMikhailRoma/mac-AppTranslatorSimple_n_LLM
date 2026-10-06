@@ -19,6 +19,12 @@ public protocol TranslationProvider: AnyObject, Sendable {
 public extension TranslationProvider {
     func translateStream(text: String, from sourceLanguageCode: String, to targetLanguageCode: String)
         -> AsyncThrowingStream<String, Error> {
+        translateOnce(text: text, from: sourceLanguageCode, to: targetLanguageCode)
+    }
+
+    /// The whole translation as a single piece, also for methods that could stream but are told not to.
+    func translateOnce(text: String, from sourceLanguageCode: String, to targetLanguageCode: String)
+        -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
             let task = Task {
                 do {

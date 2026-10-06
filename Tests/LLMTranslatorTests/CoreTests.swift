@@ -118,6 +118,21 @@ final class StreamingTests: XCTestCase {
         for try await piece in Fixed().translateStream(text: "x", from: "ru", to: "en") { pieces.append(piece) }
         XCTAssertEqual(pieces, ["whole"])
     }
+
+    func testStreamingOffGivesOnePiece() async throws {
+        final class Chunky: TranslationProvider {
+            func translate(text: String, from: String, to: String) async throws -> String { "ab" }
+            func translateStream(text: String, from: String, to: String) -> AsyncThrowingStream<String, Error> {
+                AsyncThrowingStream { $0.yield("a"); $0.yield("b"); $0.finish() }
+            }
+        }
+        let service = TranslationService(provider: Chunky(), languageDetector: LanguageDetector(native: "ru", second: "en"))
+        var on: [String] = [], off: [String] = []
+        for try await p in service.stream("hi", streaming: true).pieces { on.append(p) }
+        for try await p in service.stream("hi", streaming: false).pieces { off.append(p) }
+        XCTAssertEqual(on, ["a", "b"])
+        XCTAssertEqual(off, ["ab"])
+    }
 }
 
 final class LineJoinerTests: XCTestCase {
@@ -147,6 +162,12 @@ final class LineJoinerTests: XCTestCase {
 
     func testNormalizesWindowsNewlinesAndSpaces() {
         XCTAssertEqual(LineJoiner.join("  one  \r\n  two  "), "one two")
+    }
+
+    func testKeepsBreaksAfterSentences() {
+        let message = "Привет! Спасибо за ответ.\nЗавтра пришлю файлы.\n\nПо поводу встречи:\n- в среду не могу\n- в четверг могу после 15:00"
+        XCTAssertEqual(LineJoiner.join(message), message)
+        XCTAssertEqual(LineJoiner.join("Он сказал «да».\nПотом ушёл"), "Он сказал «да».\nПотом ушёл")
     }
 
     func testSingleLineUnchanged() {
