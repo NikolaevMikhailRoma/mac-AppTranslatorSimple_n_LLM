@@ -33,14 +33,17 @@ final class StatusItemController: NSObject {
         item.button?.image = isBusy && highlightsWhileBusy() ? Self.busyIcon : Self.idleIcon
     }
 
+    /// Also drawn on the app icon by Scripts/generate-icon.swift.
+    static let symbol = "translate"
+
     private static let idleIcon: NSImage? = {
-        let image = NSImage(systemSymbolName: "translate", accessibilityDescription: "Translator")
+        let image = NSImage(systemSymbolName: symbol, accessibilityDescription: "Translator")
         image?.isTemplate = true
         return image
     }()
 
     private static let busyIcon: NSImage? = {
-        let image = NSImage(systemSymbolName: "translate", accessibilityDescription: "Translating")?
+        let image = NSImage(systemSymbolName: symbol, accessibilityDescription: "Translating")?
             .withSymbolConfiguration(.init(paletteColors: [.systemRed]))
         image?.isTemplate = false
         return image

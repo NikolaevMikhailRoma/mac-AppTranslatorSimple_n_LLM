@@ -3,6 +3,7 @@ import Foundation
 /// Translation by a model on an OpenAI-compatible server: the prompt names the target language,
 /// the copied text goes as the user message. The source language is not sent: it is only a guess,
 /// and the model sees the text anyway.
+/// The whole path and the decisions behind it: LLM-Translation-Pipeline.md in the repo root.
 public final class LocalLLMProvider: TranslationProvider {
     private let settings: LocalLLMSettings
     private let client: OpenAIClient
