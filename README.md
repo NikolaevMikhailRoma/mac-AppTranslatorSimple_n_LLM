@@ -78,6 +78,8 @@ Run the unit tests with `swift test` (pure logic lives in the
 
 ## Version history
 
+What changed in each version: [CHANGELOG.md](CHANGELOG.md).
+
 - **0.0.4** — Settings window, streaming, model list from the server, joining broken lines, screenshots.
 - **0.0.3** — moved to SwiftPM: builds from a clone with `./build.sh`, unit tests.
 - **0.0.2** — any OpenAI-compatible API instead of LM Studio only.
