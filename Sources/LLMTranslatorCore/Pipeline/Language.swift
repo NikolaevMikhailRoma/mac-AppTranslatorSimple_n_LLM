@@ -6,6 +6,10 @@ public struct Language: Identifiable, Hashable, Sendable {
 
     public var id: String { code }
 
+    public init(code: String) {
+        self.code = code
+    }
+
     /// For Settings, in the user's interface language.
     public var displayName: String {
         (Locale.current.localizedString(forLanguageCode: code) ?? code).capitalized(with: .current)

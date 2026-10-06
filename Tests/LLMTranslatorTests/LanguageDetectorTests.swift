@@ -24,6 +24,11 @@ final class LanguageDetectorTests: XCTestCase {
         XCTAssertEqual(detector.direction(for: "12345").target, "en")
     }
 
+    func testSourceIsKnownOnlyForCyrillic() {
+        XCTAssertEqual(detector.direction(for: "Привет").source, "ru")
+        XCTAssertNil(detector.direction(for: "Hello").source, "could be any language; the method decides")
+    }
+
     func testLanguage2IsTheSetting() {
         let german = LanguageDetector(language1: "ru", language2: "de")
         XCTAssertEqual(german.direction(for: "Привет").target, "de")

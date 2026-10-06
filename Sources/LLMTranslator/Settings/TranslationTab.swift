@@ -24,6 +24,8 @@ struct TranslationTab: View {
             case .localLLM: LocalLLMSettingsView(settings: $store.settings.localLLM,
                                                  language1: store.settings.language1,
                                                  language2: store.settings.language2)
+            case .appleTranslation: AppleTranslationSettingsView(language1: store.settings.language1,
+                                                                 language2: store.settings.language2)
             }
         }
     }

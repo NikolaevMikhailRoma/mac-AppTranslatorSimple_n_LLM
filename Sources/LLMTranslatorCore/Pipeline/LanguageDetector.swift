@@ -10,10 +10,12 @@ public struct LanguageDetector: Sendable {
         self.language2 = language2
     }
 
-    /// Ties go to Cyrillic, so text with no letters is translated into language 2.
-    public func direction(for text: String) -> (source: String, target: String) {
+    /// The source is known only for Cyrillic text (language 1); anything else could be any
+    /// language, so it is left to the method (`nil`). Ties go to Cyrillic, so text with no
+    /// letters is translated into language 2.
+    public func direction(for text: String) -> (source: String?, target: String) {
         let cyrillic = text.matches(of: /\p{Script=Cyrillic}/).count
         let otherLetters = text.matches(of: /\p{L}/).count - cyrillic
-        return cyrillic >= otherLetters ? (language1, language2) : (language2, language1)
+        return cyrillic >= otherLetters ? (language1, language2) : (nil, language1)
     }
 }
