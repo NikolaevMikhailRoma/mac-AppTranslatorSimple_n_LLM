@@ -1,6 +1,4 @@
 import SwiftUI
-import LLMTranslatorCore
-import os.log
 
 /// A service to manage the translation popover window.
 @MainActor
@@ -32,7 +30,6 @@ final class PopoverService: NSObject, NSPopoverDelegate {
     /// Shows the popover at the mouse; `model` keeps filling it after this returns.
     /// - Parameter model: The text to display, and what ⌘C copies when nothing is selected.
     func show(model: BubbleModel) {
-        os_log("[PopoverService] will-show popover")
 
         // 1. Create a 1x1 anchor window at the mouse position.
         let pt = NSEvent.mouseLocation
@@ -56,7 +53,7 @@ final class PopoverService: NSObject, NSPopoverDelegate {
 
         // 2. Save focus and activate the app to bring the popover to the front.
         focusService.saveCurrentFocus()
-        NSApp.activate(ignoringOtherApps: true)
+        NSApp.activate()
 
         // 3. Show the anchor window.
         anchorWin?.orderFront(nil)
@@ -77,7 +74,7 @@ final class PopoverService: NSObject, NSPopoverDelegate {
             of: anchorWin!.contentView!,
             preferredEdge: .minY   // below the cursor, so growing height moves only the bottom edge
         )
-        os_log("[PopoverService] did-show popover %.0fx%.0f", popover.contentSize.width, popover.contentSize.height)
+        log.info("did-show popover \(Int(self.popover.contentSize.width))x\(Int(self.popover.contentSize.height))")
 
         // 6. Start monitoring for Cmd+C.
         keyboardService.startMonitoring { model.text }
@@ -87,14 +84,12 @@ final class PopoverService: NSObject, NSPopoverDelegate {
     func fitToContent() {
         let before = popover.contentSize
         DispatchQueue.main.async { [popover] in
-            os_log("[PopoverService] fit %.0fx%.0f -> %.0fx%.0f", before.width, before.height,
-                   popover.contentSize.width, popover.contentSize.height)
+            log.info("fit \(Int(before.width))x\(Int(before.height)) -> \(Int(popover.contentSize.width))x\(Int(popover.contentSize.height))")
         }
     }
 
     // MARK: NSPopoverDelegate
     func popoverWillClose(_ notification: Notification) {
-        os_log("[PopoverService] popover will close")
         anchorWin?.orderOut(nil)
         focusService.restorePreviousFocus()
         keyboardService.stopMonitoring()

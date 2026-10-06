@@ -13,7 +13,7 @@ final class FocusService {
     /// Activates the previously saved application, restoring focus.
     func restorePreviousFocus() {
         if let app = previousApp, !app.isTerminated {
-            app.activate(options: [.activateIgnoringOtherApps, .activateAllWindows])
+            app.activate(options: [.activateAllWindows])
         }
         previousApp = nil
     }

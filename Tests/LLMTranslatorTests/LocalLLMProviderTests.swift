@@ -3,7 +3,7 @@ import XCTest
 
 final class LocalLLMProviderTests: XCTestCase {
     func testStandardPrompt() {
-        let messages = LocalLLMProvider(settings: HostSettings()).messages(for: "Hi", to: "ru")
+        let messages = LocalLLMProvider(settings: LocalLLMSettings()).messages(for: "Hi", to: "ru")
         XCTAssertEqual(messages[0]["content"], """
             Translate to ru.
             Preserve every character of formatting: spaces, newlines, tabs, punctuation, emojis, special symbols.
@@ -13,7 +13,7 @@ final class LocalLLMProviderTests: XCTestCase {
     }
 
     func testBodyUsesSettings() throws {
-        var settings = HostSettings()
+        var settings = LocalLLMSettings()
         settings.model = "m"
         settings.maxTokens = 4_096
         let data = try LocalLLMProvider(settings: settings).body(for: "Hi", to: "de", stream: false)

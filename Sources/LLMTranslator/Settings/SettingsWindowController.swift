@@ -39,7 +39,7 @@ final class SettingsWindowController {
     }
 
     func show() {
-        NSApp.activate(ignoringOtherApps: true)
+        NSApp.activate()
         window.makeKeyAndOrderFront(nil)
     }
 

@@ -12,18 +12,17 @@ final class TranslationProviderTests: XCTestCase {
         XCTAssertEqual(pieces, ["whole"])
     }
 
-    func testStreamingOffGivesOnePiece() async throws {
+    func testOnceGivesOnePieceEvenForAStreamingProvider() async throws {
         final class Chunky: TranslationProvider {
             func translate(text: String, from: String, to: String) async throws -> String { "ab" }
             func translateStream(text: String, from: String, to: String) -> AsyncThrowingStream<String, Error> {
                 AsyncThrowingStream { $0.yield("a"); $0.yield("b"); $0.finish() }
             }
         }
-        let service = TranslationService(provider: Chunky(), languageDetector: LanguageDetector(native: "ru", second: "en"))
-        var on: [String] = [], off: [String] = []
-        for try await p in service.stream("hi", streaming: true).pieces { on.append(p) }
-        for try await p in service.stream("hi", streaming: false).pieces { off.append(p) }
-        XCTAssertEqual(on, ["a", "b"])
-        XCTAssertEqual(off, ["ab"])
+        var streamed: [String] = [], once: [String] = []
+        for try await p in Chunky().translateStream(text: "hi", from: "ru", to: "en") { streamed.append(p) }
+        for try await p in Chunky().translateOnce(text: "hi", from: "ru", to: "en") { once.append(p) }
+        XCTAssertEqual(streamed, ["a", "b"])
+        XCTAssertEqual(once, ["ab"])
     }
 }

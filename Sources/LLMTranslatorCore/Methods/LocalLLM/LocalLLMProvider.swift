@@ -4,10 +4,10 @@ import Foundation
 /// the copied text goes as the user message. The source language is not sent: it is only a guess,
 /// and the model sees the text anyway.
 public final class LocalLLMProvider: TranslationProvider {
-    private let settings: HostSettings
+    private let settings: LocalLLMSettings
     private let client: OpenAIClient
 
-    public init(settings: HostSettings, client: OpenAIClient? = nil) {
+    public init(settings: LocalLLMSettings, client: OpenAIClient? = nil) {
         self.settings = settings
         self.client = client ?? OpenAIClient(baseURL: settings.baseURL)
     }

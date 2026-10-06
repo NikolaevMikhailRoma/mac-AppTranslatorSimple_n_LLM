@@ -2,30 +2,30 @@ import XCTest
 @testable import LLMTranslatorCore
 
 final class LanguageDetectorTests: XCTestCase {
-    private let detector = LanguageDetector(native: "ru", second: "en")
+    private let detector = LanguageDetector(language1: "ru", language2: "en")
 
     func testCyrillicTranslatesToLanguage2() {
-        XCTAssertEqual(detector.determineLanguageDirection(for: "Привет, мир").target, "en")
+        XCTAssertEqual(detector.direction(for: "Привет, мир").target, "en")
     }
 
     func testLatinTranslatesToLanguage1() {
-        XCTAssertEqual(detector.determineLanguageDirection(for: "Hello, world").target, "ru")
+        XCTAssertEqual(detector.direction(for: "Hello, world").target, "ru")
     }
 
     func testAnyNonCyrillicScriptTranslatesToLanguage1() {
-        XCTAssertEqual(detector.determineLanguageDirection(for: "你好，世界").target, "ru")
+        XCTAssertEqual(detector.direction(for: "你好，世界").target, "ru")
     }
 
     func testMixedTextFollowsMajority() {
-        XCTAssertEqual(detector.determineLanguageDirection(for: "Запусти swift build ещё раз").target, "en")
+        XCTAssertEqual(detector.direction(for: "Запусти swift build ещё раз").target, "en")
     }
 
     func testNoLettersGoesToLanguage2() {
-        XCTAssertEqual(detector.determineLanguageDirection(for: "12345").target, "en")
+        XCTAssertEqual(detector.direction(for: "12345").target, "en")
     }
 
     func testLanguage2IsTheSetting() {
-        let german = LanguageDetector(native: "ru", second: "de")
-        XCTAssertEqual(german.determineLanguageDirection(for: "Привет").target, "de")
+        let german = LanguageDetector(language1: "ru", language2: "de")
+        XCTAssertEqual(german.direction(for: "Привет").target, "de")
     }
 }

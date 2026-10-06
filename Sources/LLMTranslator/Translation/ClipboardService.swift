@@ -1,6 +1,4 @@
-import Cocoa
-import Combine
-import LLMTranslatorCore
+import AppKit
 
 /// A service that monitors the clipboard for double-copy gestures.
 @MainActor
@@ -11,8 +9,8 @@ final class ClipboardService {
     private let doubleCopyGap: () -> TimeInterval
     private var timer: Timer?
 
-    /// A publisher that emits an event when a double-copy is detected.
-    let doubleCopyPublisher = PassthroughSubject<Void, Never>()
+    /// Called on ⌘C C: two copies closer than the gap in Settings.
+    var onDoubleCopy: (() -> Void)?
 
     /// - Parameter doubleCopyGap: Read on every copy, so a change in Settings applies at once.
     init(doubleCopyGap: @escaping () -> TimeInterval) {
@@ -49,7 +47,7 @@ final class ClipboardService {
 
         let now = Date()
         if now.timeIntervalSince(lastCopyTime) <= doubleCopyGap() {
-            doubleCopyPublisher.send()
+            onDoubleCopy?()
         }
 
         lastCopyTime = now
