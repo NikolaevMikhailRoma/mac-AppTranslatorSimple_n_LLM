@@ -2,7 +2,7 @@ import Foundation
 
 /// Abstraction for translation engines.
 /// Implementations can route to local models, remote HTTP APIs, etc.
-public protocol TranslationProvider: AnyObject {
+public protocol TranslationProvider: AnyObject, Sendable {
     /// Translates the provided text from `sourceLanguageCode` to `targetLanguageCode`.
     /// - Parameters:
     ///   - text: Input text to translate.

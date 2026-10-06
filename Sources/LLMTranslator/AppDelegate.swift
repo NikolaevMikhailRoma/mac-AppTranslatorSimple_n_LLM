@@ -2,7 +2,9 @@ import Cocoa
 import SwiftUI
 import os.log
 import Combine
+import LLMTranslatorCore
 
+@MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: UI

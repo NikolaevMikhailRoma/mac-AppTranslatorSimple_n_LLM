@@ -1,0 +1,34 @@
+#!/bin/bash
+# Build the SwiftPM executable and package it as a runnable .app bundle.
+set -euo pipefail
+cd "$(dirname "$0")"
+
+APP_NAME="LLMTranslator"
+BUNDLE="$APP_NAME.app"
+
+swift build -c release
+
+rm -rf "$BUNDLE"
+mkdir -p "$BUNDLE/Contents/MacOS" "$BUNDLE/Contents/Resources"
+cp ".build/release/$APP_NAME" "$BUNDLE/Contents/MacOS/$APP_NAME"
+cp Info.plist "$BUNDLE/Contents/Info.plist"
+
+# settings.json is read via Bundle.main from Contents/Resources.
+cp Resources/settings.json "$BUNDLE/Contents/Resources/settings.json"
+
+if [ -f Resources/AppIcon.icns ]; then
+    cp Resources/AppIcon.icns "$BUNDLE/Contents/Resources/AppIcon.icns"
+fi
+
+swift Scripts/apply-config.swift app.json "$BUNDLE/Contents/Info.plist"
+
+# app.json is the single source of the version; fail if the bundle disagrees.
+EXPECTED=$(plutil -extract version raw app.json)
+ACTUAL=$(plutil -extract CFBundleShortVersionString raw "$BUNDLE/Contents/Info.plist")
+if [ "$EXPECTED" != "$ACTUAL" ]; then
+    echo "Version mismatch: app.json has $EXPECTED, bundle has $ACTUAL" >&2
+    exit 1
+fi
+codesign --force --deep --sign - --entitlements LLMTranslator.entitlements "$BUNDLE"
+
+echo "Built $BUNDLE — run with: open $BUNDLE"

@@ -2,14 +2,14 @@ import Foundation
 import RegexBuilder
 import os.log
 
-public class LanguageDetector {
+public final class LanguageDetector: Sendable {
     private let config: AppConfig
 
-    init(config: AppConfig) {
+    public init(config: AppConfig) {
         self.config = config
     }
 
-    func determineLanguageDirection(for text: String) -> (source: String, target: String) {
+    public func determineLanguageDirection(for text: String) -> (source: String, target: String) {
         let languages = config.languageCodes.map { $0.lowercased() }
         guard !languages.isEmpty else { return ("en", "ru") }
 

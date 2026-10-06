@@ -1,6 +1,7 @@
 import AppKit
 
 /// A service to handle keyboard events, specifically for copying text from the popover.
+@MainActor
 final class KeyboardService {
     private var keyMonitor: Any?
 
@@ -41,9 +42,5 @@ final class KeyboardService {
             NSEvent.removeMonitor(monitor)
             keyMonitor = nil
         }
-    }
-
-    deinit {
-        stopMonitoring()
     }
 }

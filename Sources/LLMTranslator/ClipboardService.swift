@@ -1,7 +1,9 @@
 import Cocoa
 import Combine
+import LLMTranslatorCore
 
 /// A service that monitors the clipboard for double-copy gestures.
+@MainActor
 final class ClipboardService {
     private let pasteboard = NSPasteboard.general
     private var lastChangeCount: Int
@@ -24,7 +26,8 @@ final class ClipboardService {
     func startMonitoring() {
         guard timer == nil else { return }
         timer = .scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
-            self?.pollClipboard()
+            // The timer runs on the main run loop.
+            MainActor.assumeIsolated { self?.pollClipboard() }
         }
         RunLoop.main.add(timer!, forMode: .common)
     }
@@ -45,9 +48,5 @@ final class ClipboardService {
 
         lastCopyTime = now
         lastChangeCount = pasteboard.changeCount
-    }
-
-    deinit {
-        stopMonitoring()
     }
 }

@@ -1,8 +1,7 @@
 import Foundation
-import Foundation
 
 /// Handles translation requests by orchestrating a provider and a language detector.
-public final class TranslationService {
+public final class TranslationService: Sendable {
     private let provider: TranslationProvider
     private let languageDetector: LanguageDetector
 

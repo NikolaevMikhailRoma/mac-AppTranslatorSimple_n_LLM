@@ -1,6 +1,7 @@
 import AppKit
 
 /// A service to manage application focus.
+@MainActor
 final class FocusService {
     private var previousApp: NSRunningApplication?
 

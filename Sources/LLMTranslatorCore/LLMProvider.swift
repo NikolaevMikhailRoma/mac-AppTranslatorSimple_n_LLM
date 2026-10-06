@@ -3,8 +3,10 @@ import Foundation
 /// A provider that connects to any Chat Completions API endpoint.
 public final class LLMProvider: TranslationProvider {
     private let session: URLSession
+    private let config: AppConfig
 
-    public init(session: URLSession? = nil) {
+    public init(config: AppConfig, session: URLSession? = nil) {
+        self.config = config
         if let session = session {
             self.session = session
         } else {
@@ -30,7 +32,6 @@ public final class LLMProvider: TranslationProvider {
 
     // MARK: - Networking helpers
     private func post(_ body: Data) async throws -> Data {
-        let config = SettingsStore.shared.config
         guard let endpoint = URL(string: config.baseURL) else {
             throw NSError(domain: "LLMProvider", code: 100,
                           userInfo: [NSLocalizedDescriptionKey: "Invalid baseURL in settings: \(config.baseURL)"])
@@ -54,7 +55,7 @@ public final class LLMProvider: TranslationProvider {
         return data
     }
 
-    private func extractAnswer(from data: Data) throws -> String {
+    func extractAnswer(from data: Data) throws -> String {
         struct Message: Decodable { let role: String; let content: String }
         struct Choice: Decodable { let message: Message }
         struct ResponseBody: Decodable { let choices: [Choice] }
@@ -67,8 +68,7 @@ public final class LLMProvider: TranslationProvider {
     }
 
     // MARK: - Payload builder
-    private func makeRequestPayload(messages: [[String: String]]) throws -> Data {
-        let config = SettingsStore.shared.config
+    func makeRequestPayload(messages: [[String: String]]) throws -> Data {
         var dict = config.requestBody.toDictionary()
         
         if let modelId = config.modelIdentifier, !modelId.isEmpty {
@@ -80,7 +80,7 @@ public final class LLMProvider: TranslationProvider {
     }
 
     // MARK: - Prompt construction
-    private func buildMessages(for text: String, from srcLang: String, to dstLang: String) -> [[String: String]] {
+    func buildMessages(for text: String, from srcLang: String, to dstLang: String) -> [[String: String]] {
         let systemPrompt = """
         Translate from \(srcLang) to \(dstLang).
         Preserve every character of formatting: spaces, newlines, tabs, punctuation, emojis, special symbols.

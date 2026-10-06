@@ -1,16 +1,15 @@
 import Foundation
-import Combine
 
 // MARK: - Models
 
-public struct RequestBody: Codable, Equatable {
+public struct RequestBody: Codable, Equatable, Sendable {
     public var temperature: Double
     public var max_tokens: Int
     public var stream: Bool
     public var tool_choice: String?
     public var enable_thinking: Bool?
 
-    func toDictionary() -> [String: Any] {
+    public func toDictionary() -> [String: Any] {
         var dict: [String: Any] = [
             "temperature": temperature,
             "max_tokens": max_tokens,
@@ -27,7 +26,7 @@ public struct RequestBody: Codable, Equatable {
 }
 
 /// Minimal app configuration loaded from a single JSON file.
-public struct AppConfig: Codable, Equatable {
+public struct AppConfig: Codable, Equatable, Sendable {
     /// The base URL of the LLM API endpoint.
     public var baseURL: String
     /// The API key for the service. Optional, as local servers may not require one.
@@ -49,33 +48,5 @@ public struct AppConfig: Codable, Equatable {
     enum CodingKeys: String, CodingKey {
         case baseURL, apiKey, modelIdentifier, languageCodes, languageDetectionRegexes, doubleCopyGapSeconds, requestBody
         case maxLineLength
-    }
-}
-
-// MARK: - Settings store (read-only)
-
-/// Loads settings from JSON. Use SETTINGS_FILE env var to specify alternative config.
-public final class SettingsStore: ObservableObject {
-    public static let shared = SettingsStore()
-
-    /// Immutable configuration used by the app.
-    @Published public private(set) var config: AppConfig
-
-    private init() {
-        let settingsFileName = ProcessInfo.processInfo.environment["SETTINGS_FILE"] ?? "settings"
-
-        guard let url = Bundle.main.url(forResource: settingsFileName, withExtension: "json") else {
-            fatalError("Missing \(settingsFileName).json in bundle. Add it to the target resources.")
-        }
-        do {
-            let data = try Data(contentsOf: url)
-            let decoder = JSONDecoder()
-            var loadedConfig = try decoder.decode(AppConfig.self, from: data)
-
-            self.config = loadedConfig
-            print("✓ Loaded configuration from \(settingsFileName).json")
-        } catch {
-            fatalError("Failed to load \(settingsFileName).json: \(error)")
-        }
     }
 }
