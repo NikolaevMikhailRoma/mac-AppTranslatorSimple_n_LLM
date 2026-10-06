@@ -1,32 +1,34 @@
 import Foundation
-import Combine
+import Observation
 import LLMTranslatorCore
 
-// MARK: - Settings store (read-only)
-
-/// Loads settings from JSON. Use SETTINGS_FILE env var to specify alternative config.
+/// What the user set in Settings, kept as one JSON value in UserDefaults.
 @MainActor
-public final class SettingsStore: ObservableObject {
-    public static let shared = SettingsStore()
+@Observable
+final class SettingsStore {
+    private static let key = "Settings"
 
-    /// Immutable configuration used by the app.
-    @Published public private(set) var config: AppConfig
+    @ObservationIgnored private let defaults: UserDefaults
 
-    private init() {
-        let settingsFileName = ProcessInfo.processInfo.environment["SETTINGS_FILE"] ?? "settings"
-
-        guard let url = Bundle.main.url(forResource: settingsFileName, withExtension: "json") else {
-            fatalError("Missing \(settingsFileName).json in bundle. Add it to the target resources.")
+    var settings: Settings {
+        didSet {
+            guard settings != oldValue else { return }
+            save()
         }
-        do {
-            let data = try Data(contentsOf: url)
-            let decoder = JSONDecoder()
-            let loadedConfig = try decoder.decode(AppConfig.self, from: data)
+    }
 
-            self.config = loadedConfig
-            print("✓ Loaded configuration from \(settingsFileName).json")
-        } catch {
-            fatalError("Failed to load \(settingsFileName).json: \(error)")
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        if let data = defaults.data(forKey: Self.key),
+           let stored = try? JSONDecoder().decode(Settings.self, from: data) {
+            self.settings = stored
+        } else {
+            self.settings = Settings()
         }
+    }
+
+    private func save() {
+        guard let data = try? JSONEncoder().encode(settings) else { return }
+        defaults.set(data, forKey: Self.key)
     }
 }

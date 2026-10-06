@@ -2,13 +2,12 @@ import Foundation
 import LLMTranslatorCore
 
 /// A factory for creating translation providers.
-final class ProviderFactory {
-    /// Creates and returns a `TranslationProvider` instance.
-    /// - Parameter config: The application's configuration.
-    /// - Returns: A concrete instance of a `TranslationProvider`.
-    static func createProvider(for config: AppConfig) -> TranslationProvider {
-        // Currently, we only have one provider type.
-        // This factory can be extended in the future if other provider types are added.
-        return LLMProvider(config: config)
+enum ProviderFactory {
+    /// Built for every translation, so a change in Settings applies to the next ⌘C C.
+    static func createProvider(for settings: Settings, config: AppConfig) -> TranslationProvider {
+        switch settings.method {
+        case .host:
+            return LLMProvider(host: settings.host, requestBody: config.requestBody)
+        }
     }
 }

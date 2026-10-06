@@ -13,9 +13,6 @@ mkdir -p "$BUNDLE/Contents/MacOS" "$BUNDLE/Contents/Resources"
 cp ".build/release/$APP_NAME" "$BUNDLE/Contents/MacOS/$APP_NAME"
 cp Info.plist "$BUNDLE/Contents/Info.plist"
 
-# settings.json is read via Bundle.main from Contents/Resources.
-cp Resources/settings.json "$BUNDLE/Contents/Resources/settings.json"
-
 if [ -f Resources/AppIcon.icns ]; then
     cp Resources/AppIcon.icns "$BUNDLE/Contents/Resources/AppIcon.icns"
 fi

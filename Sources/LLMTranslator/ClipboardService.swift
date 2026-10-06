@@ -8,16 +8,15 @@ final class ClipboardService {
     private let pasteboard = NSPasteboard.general
     private var lastChangeCount: Int
     private var lastCopyTime: Date
-    private let doubleCopyGap: TimeInterval
+    private let doubleCopyGap: () -> TimeInterval
     private var timer: Timer?
 
     /// A publisher that emits an event when a double-copy is detected.
     let doubleCopyPublisher = PassthroughSubject<Void, Never>()
 
-    /// Initializes the service with a given configuration.
-    /// - Parameter config: The application's configuration.
-    init(config: AppConfig) {
-        self.doubleCopyGap = config.doubleCopyGapSeconds
+    /// - Parameter doubleCopyGap: Read on every copy, so a change in Settings applies at once.
+    init(doubleCopyGap: @escaping () -> TimeInterval) {
+        self.doubleCopyGap = doubleCopyGap
         self.lastChangeCount = pasteboard.changeCount
         self.lastCopyTime = Date()
     }
@@ -42,7 +41,7 @@ final class ClipboardService {
         guard pasteboard.changeCount != lastChangeCount else { return }
 
         let now = Date()
-        if now.timeIntervalSince(lastCopyTime) <= doubleCopyGap {
+        if now.timeIntervalSince(lastCopyTime) <= doubleCopyGap() {
             doubleCopyPublisher.send()
         }
 

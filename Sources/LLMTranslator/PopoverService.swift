@@ -8,15 +8,13 @@ final class PopoverService: NSObject, NSPopoverDelegate {
     // MARK: Properties
     private let popover = NSPopover()
     private var anchorWin: NSWindow?
-    private let config: AppConfig
 
     // MARK: Dependencies
     private let focusService: FocusService
     private let keyboardService: KeyboardService
 
     // MARK: Lifecycle
-    init(config: AppConfig, focusService: FocusService, keyboardService: KeyboardService) {
-        self.config = config
+    init(focusService: FocusService, keyboardService: KeyboardService) {
         self.focusService = focusService
         self.keyboardService = keyboardService
         super.init()
@@ -27,11 +25,13 @@ final class PopoverService: NSObject, NSPopoverDelegate {
     }
 
     /// Shows the popover with the provided text.
-    /// - Parameter text: The text to display in the popover.
-    func show(text: String) {
+    /// - Parameters:
+    ///   - text: The text to display in the popover.
+    ///   - maxLineLength: Longer lines are wrapped; 0 or nil leaves them alone.
+    func show(text: String, maxLineLength: Int?) {
         os_log("[PopoverService] will-show popover")
 
-        let wrappedText = TextWrap.wrap(text, maxLength: config.maxLineLength)
+        let wrappedText = TextWrap.wrap(text, maxLength: maxLineLength)
 
         // 1. Create a 1x1 anchor window at the mouse position.
         let pt = NSEvent.mouseLocation

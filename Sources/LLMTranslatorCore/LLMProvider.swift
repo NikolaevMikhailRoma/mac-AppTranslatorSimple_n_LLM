@@ -3,10 +3,14 @@ import Foundation
 /// A provider that connects to any Chat Completions API endpoint.
 public final class LLMProvider: TranslationProvider {
     private let session: URLSession
-    private let config: AppConfig
+    private let host: HostSettings
+    private let requestBody: RequestBody
+    private let apiKey: String?
 
-    public init(config: AppConfig, session: URLSession? = nil) {
-        self.config = config
+    public init(host: HostSettings, requestBody: RequestBody, apiKey: String? = nil, session: URLSession? = nil) {
+        self.host = host
+        self.requestBody = requestBody
+        self.apiKey = apiKey
         if let session = session {
             self.session = session
         } else {
@@ -32,16 +36,16 @@ public final class LLMProvider: TranslationProvider {
 
     // MARK: - Networking helpers
     private func post(_ body: Data) async throws -> Data {
-        guard let endpoint = URL(string: config.baseURL) else {
+        guard let endpoint = host.chatCompletionsURL else {
             throw NSError(domain: "LLMProvider", code: 100,
-                          userInfo: [NSLocalizedDescriptionKey: "Invalid baseURL in settings: \(config.baseURL)"])
+                          userInfo: [NSLocalizedDescriptionKey: "Invalid server URL in Settings: \(host.baseURL)"])
         }
 
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        if let apiKey = config.apiKey, !apiKey.isEmpty {
+        if let apiKey, !apiKey.isEmpty {
             request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         }
 
@@ -69,10 +73,11 @@ public final class LLMProvider: TranslationProvider {
 
     // MARK: - Payload builder
     func makeRequestPayload(messages: [[String: String]]) throws -> Data {
-        var dict = config.requestBody.toDictionary()
-        
-        if let modelId = config.modelIdentifier, !modelId.isEmpty {
-            dict["model"] = modelId
+        var dict = requestBody.toDictionary()
+
+        let model = host.model.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !model.isEmpty {
+            dict["model"] = model
         }
         
         dict["messages"] = messages
@@ -81,11 +86,9 @@ public final class LLMProvider: TranslationProvider {
 
     // MARK: - Prompt construction
     func buildMessages(for text: String, from srcLang: String, to dstLang: String) -> [[String: String]] {
-        let systemPrompt = """
-        Translate from \(srcLang) to \(dstLang).
-        Preserve every character of formatting: spaces, newlines, tabs, punctuation, emojis, special symbols.
-        Output ONLY the translation, nothing else.
-        """
+        let systemPrompt = host.prompt
+            .replacingOccurrences(of: "{from}", with: srcLang)
+            .replacingOccurrences(of: "{to}", with: dstLang)
 
         return [
             ["role": "system", "content": systemPrompt],

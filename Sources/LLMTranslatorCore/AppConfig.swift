@@ -25,28 +25,13 @@ public struct RequestBody: Codable, Equatable, Sendable {
     }
 }
 
-/// Minimal app configuration loaded from a single JSON file.
-public struct AppConfig: Codable, Equatable, Sendable {
-    /// The base URL of the LLM API endpoint.
-    public var baseURL: String
-    /// The API key for the service. Optional, as local servers may not require one.
-    public var apiKey: String?
-    /// The identifier of the model to use. Optional, will rely on server's default if not provided.
-    public var modelIdentifier: String?
-
-    /// Language codes with the first treated as the user's initial language.
-    public var languageCodes: [String]
-    /// Optional regex rules for counting characters per language to detect source language.
-    public var languageDetectionRegexes: [String: String]? = nil
-    /// Time window in seconds to detect a double copy gesture.
-    public var doubleCopyGapSeconds: Double
-    /// Request body parameters.
+/// Fixed behaviour that is not in Settings: changing it means changing the code.
+public struct AppConfig: Equatable, Sendable {
+    /// Request body parameters sent with every translation.
     public var requestBody: RequestBody
-    /// Maximum line length for the translated text.
-    public var maxLineLength: Int?
 
-    enum CodingKeys: String, CodingKey {
-        case baseURL, apiKey, modelIdentifier, languageCodes, languageDetectionRegexes, doubleCopyGapSeconds, requestBody
-        case maxLineLength
-    }
+    public static let `default` = AppConfig(
+        requestBody: RequestBody(temperature: 0, max_tokens: 1024, stream: false,
+                                 tool_choice: nil, enable_thinking: false)
+    )
 }

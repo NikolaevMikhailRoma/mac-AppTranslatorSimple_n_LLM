@@ -9,10 +9,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: UI
     private var statusItem: NSStatusItem!
+    /// Requests still waiting for the model; a new ⌘C C can start before the last one ends.
+    private var runningRequests = 0 {
+        didSet { updateStatusIcon() }
+    }
+
+    // MARK: Settings
+    private let store = SettingsStore()
+    private let config = AppConfig.default
+    private var settingsWindow: SettingsWindowController?
 
     // MARK: Services
-    private var translationService: TranslationService!
-    private var languageDetector: LanguageDetector!
     private var clipboardService: ClipboardService!
     private var popoverService: PopoverService!
     private var focusService: FocusService!
@@ -22,27 +29,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: App lifecycle
     func applicationDidFinishLaunching(_: Notification) {
         buildStatusItem()
+        NSApp.mainMenu = AppMenu.make()
 
-        // 1. Load config
-        let config = SettingsStore.shared.config
-
-        // 2. Initialize services
-        let provider = ProviderFactory.createProvider(for: config)
-        languageDetector = LanguageDetector(config: config)
-        translationService = TranslationService(provider: provider, languageDetector: languageDetector)
-        clipboardService = ClipboardService(config: config)
+        // 1. Initialize services; the translation service is built per request from current settings
+        clipboardService = ClipboardService { [store] in store.settings.developer.doubleCopyGapSeconds }
         focusService = FocusService()
         keyboardService = KeyboardService()
-        popoverService = PopoverService(config: config, focusService: focusService, keyboardService: keyboardService)
+        popoverService = PopoverService(focusService: focusService, keyboardService: keyboardService)
 
-        // 3. Set up event handling
+        // 2. Set up event handling
         clipboardService.doubleCopyPublisher
             .sink { [weak self] in
                 self?.handleDoubleCopy()
             }
             .store(in: &cancellables)
 
-        // 4. Start services
+        // 3. Start services
         clipboardService.startMonitoring()
         os_log("[AppDelegate] Services are running")
     }
@@ -54,18 +56,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: Event Handling
     private func handleDoubleCopy() {
         guard let src = NSPasteboard.general.string(forType: .string), !src.isEmpty else { return }
+        let settings = store.settings
+        let translationService = TranslationService(
+            provider: ProviderFactory.createProvider(for: settings, config: config),
+            languageDetector: LanguageDetector(native: settings.nativeLanguage, second: settings.secondLanguage)
+        )
+        runningRequests += 1
         Task {
+            defer { runningRequests -= 1 }
             do {
                 let tuple = try await translationService.translate(src)
                 let prefix = "\(tuple.source) -> \(tuple.target)\n"
                 await MainActor.run {
-                    popoverService.show(text: prefix + tuple.result)
+                    popoverService.show(text: prefix + tuple.result, maxLineLength: settings.developer.maxLineLength)
                 }
             } catch {
                 os_log("[AppDelegate] Translation failed: %@", type: .error, String(describing: error))
                 // Optionally, show an error in the popover
                 await MainActor.run {
-                    popoverService.show(text: "Translation Error:\n\(String(describing: error))")
+                    popoverService.show(text: "Translation Error:\n\(String(describing: error))",
+                                        maxLineLength: settings.developer.maxLineLength)
                 }
             }
         }
@@ -75,12 +85,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func buildStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let btn = statusItem.button {
-            btn.image = NSImage(systemSymbolName: "character.cursor.ibeam",
+            btn.image = NSImage(systemSymbolName: "translate",
                                 accessibilityDescription: "Translator")
             let menu = NSMenu()
+            menu.addItem(withTitle: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
+            menu.addItem(.separator())
             menu.addItem(withTitle: "Quit", action: #selector(quit), keyEquivalent: "q")
             statusItem.menu = menu
         }
+    }
+
+    /// Red while the model works, the usual menu bar colour otherwise.
+    private func updateStatusIcon() {
+        let busy = runningRequests > 0 && store.settings.developer.highlightIconWhileTranslating
+        statusItem.button?.contentTintColor = busy ? .systemRed : nil
+    }
+
+    @objc private func openSettings() {
+        if settingsWindow == nil {
+            settingsWindow = SettingsWindowController(store: store)
+        }
+        settingsWindow?.show()
     }
 
     @objc private func quit() { NSApp.terminate(nil) }
