@@ -10,5 +10,26 @@ public protocol TranslationProvider: AnyObject, Sendable {
     ///   - targetLanguageCode: BCP-47 language code of the desired output.
     /// - Returns: The translated text, without extra commentary.
     func translate(text: String, from sourceLanguageCode: String, to targetLanguageCode: String) async throws -> String
+
+    /// The translation in pieces as they arrive. Methods that cannot stream use the default: one piece.
+    func translateStream(text: String, from sourceLanguageCode: String, to targetLanguageCode: String)
+        -> AsyncThrowingStream<String, Error>
+}
+
+public extension TranslationProvider {
+    func translateStream(text: String, from sourceLanguageCode: String, to targetLanguageCode: String)
+        -> AsyncThrowingStream<String, Error> {
+        AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    continuation.yield(try await translate(text: text, from: sourceLanguageCode, to: targetLanguageCode))
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
 }
 

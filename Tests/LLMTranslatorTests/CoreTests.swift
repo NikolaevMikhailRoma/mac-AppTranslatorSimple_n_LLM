@@ -93,6 +93,33 @@ final class LanguageDetectorTests: XCTestCase {
     }
 }
 
+final class StreamingTests: XCTestCase {
+    func testParsesLMStudioChunks() {
+        XCTAssertEqual(LLMProvider.parseEvent(#"data: {"choices":[{"index":0,"delta":{"role":"assistant","content":"При"}}]}"#),
+                       .piece("При"))
+        XCTAssertEqual(LLMProvider.parseEvent(#"data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}"#), .skip)
+        XCTAssertEqual(LLMProvider.parseEvent("data: [DONE]"), .done)
+        XCTAssertEqual(LLMProvider.parseEvent(""), .skip)
+        XCTAssertEqual(LLMProvider.parseEvent(": keep-alive"), .skip)
+    }
+
+    func testStreamingPayloadAsksForStream() throws {
+        let p = LLMProvider(host: HostSettings(), requestBody: AppConfig.default.requestBody)
+        let json = try JSONSerialization.jsonObject(with: p.makeRequestPayload(messages: [], stream: true)) as? [String: Any]
+        XCTAssertEqual(json?["stream"] as? Bool, true)
+    }
+
+    /// A method that cannot stream still works through translateStream: one piece.
+    func testDefaultStreamYieldsWholeTranslation() async throws {
+        final class Fixed: TranslationProvider {
+            func translate(text: String, from: String, to: String) async throws -> String { "whole" }
+        }
+        var pieces: [String] = []
+        for try await piece in Fixed().translateStream(text: "x", from: "ru", to: "en") { pieces.append(piece) }
+        XCTAssertEqual(pieces, ["whole"])
+    }
+}
+
 final class LineJoinerTests: XCTestCase {
     func testJoinsLinesInsideAParagraph() {
         XCTAssertEqual(LineJoiner.join("Это предложение\nразорвано посередине\nвёрсткой PDF."),

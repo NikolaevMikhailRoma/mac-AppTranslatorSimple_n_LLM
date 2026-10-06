@@ -24,12 +24,14 @@ final class PopoverService: NSObject, NSPopoverDelegate {
         popover.delegate = self
     }
 
-    /// Shows the popover with the provided text.
+    /// Called when the popover closes, e.g. to stop a translation nobody will see.
+    var onClose: (() -> Void)?
+
+    /// Shows the popover at the mouse; `model` keeps filling it after this returns.
     /// - Parameters:
-    ///   - header: A small grey line above the text, not copied.
-    ///   - text: The text to display, and what ⌘C copies when nothing is selected.
-    ///   - maxWidth: Wider text wraps on screen only.
-    func show(header: String?, text: String, maxWidth: CGFloat) {
+    ///   - model: The text to display, and what ⌘C copies when nothing is selected.
+    ///   - size: The text area, estimated up front.
+    func show(model: BubbleModel, size: CGSize) {
         os_log("[PopoverService] will-show popover")
 
         // 1. Create a 1x1 anchor window at the mouse position.
@@ -60,9 +62,7 @@ final class PopoverService: NSObject, NSPopoverDelegate {
         anchorWin?.orderFront(nil)
 
         // 4. Set up the SwiftUI view and size the popover.
-        let bubble = TranslationBubble(header: header, text: text,
-                                       width: TranslationBubble.width(for: text, maxWidth: maxWidth))
-        let host = NSHostingController(rootView: bubble)
+        let host = NSHostingController(rootView: TranslationBubble(model: model, size: size))
         host.view.layoutSubtreeIfNeeded()
         popover.contentViewController = host
         popover.contentSize = host.view.fittingSize
@@ -76,7 +76,7 @@ final class PopoverService: NSObject, NSPopoverDelegate {
         os_log("[PopoverService] did-show popover")
 
         // 6. Start monitoring for Cmd+C.
-        keyboardService.startMonitoring(for: text)
+        keyboardService.startMonitoring { model.text }
     }
 
     // MARK: NSPopoverDelegate
@@ -85,5 +85,6 @@ final class PopoverService: NSObject, NSPopoverDelegate {
         anchorWin?.orderOut(nil)
         focusService.restorePreviousFocus()
         keyboardService.stopMonitoring()
+        onClose?()
     }
 }

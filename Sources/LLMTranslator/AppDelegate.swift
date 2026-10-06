@@ -10,6 +10,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: UI
     private var statusItem: NSStatusItem!
     /// Requests still waiting for the model; a new ⌘C C can start before the last one ends.
+    /// The translation on screen; a new ⌘C C or closing the popup cancels it.
+    private var currentTranslation: Task<Void, Never>?
     private var runningRequests = 0 {
         didSet { updateStatusIcon() }
     }
@@ -36,6 +38,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         focusService = FocusService()
         keyboardService = KeyboardService()
         popoverService = PopoverService(focusService: focusService, keyboardService: keyboardService)
+        popoverService.onClose = { [weak self] in self?.currentTranslation?.cancel() }
 
         // 2. Set up event handling
         clipboardService.doubleCopyPublisher
@@ -62,25 +65,40 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             provider: ProviderFactory.createProvider(for: settings, config: config),
             languageDetector: LanguageDetector(native: settings.nativeLanguage, second: settings.secondLanguage)
         )
+        let (source, target, pieces) = translationService.stream(src)
+
+        // The popup opens at once with a blinking cursor, sized by the original.
+        let model = BubbleModel(header: "\(source) → \(target)", trims: settings.trimTranslation)
+        let screen = NSScreen.main?.visibleFrame.size ?? CGSize(width: 1440, height: 900)
+        let size = TranslationBubble.estimatedSize(for: src,
+                                                   maxWidth: CGFloat(settings.developer.popupMaxWidth),
+                                                   maxHeight: screen.height * 0.6)
+        currentTranslation?.cancel()
+        popoverService.show(model: model, size: size)
+
         runningRequests += 1
-        Task {
+        currentTranslation = Task {
             defer { runningRequests -= 1 }
+            let started = Date()
             do {
-                let tuple = try await translationService.translate(src)
-                await MainActor.run {
-                    if settings.copyTranslation {
-                        clipboardService.write(tuple.result)
+                for try await piece in pieces {
+                    if model.text.isEmpty {
+                        os_log("[AppDelegate] first piece after %d ms", Int(Date().timeIntervalSince(started) * 1000))
                     }
-                    popoverService.show(header: "\(tuple.source) → \(tuple.target)", text: tuple.result,
-                                        maxWidth: CGFloat(settings.developer.popupMaxWidth))
+                    model.append(piece)
+                }
+                // A cancelled stream just ends; its half-written text must not reach the clipboard.
+                guard !Task.isCancelled else { return }
+                model.finish()
+                os_log("[AppDelegate] finished after %d ms, %d characters",
+                       Int(Date().timeIntervalSince(started) * 1000), model.text.count)
+                if settings.copyTranslation {
+                    clipboardService.write(model.text)
                 }
             } catch {
+                guard !Task.isCancelled else { return }
                 os_log("[AppDelegate] Translation failed: %@", type: .error, String(describing: error))
-                // Optionally, show an error in the popover
-                await MainActor.run {
-                    popoverService.show(header: "Translation error", text: String(describing: error),
-                                        maxWidth: CGFloat(settings.developer.popupMaxWidth))
-                }
+                model.fail(String(describing: error))
             }
         }
     }

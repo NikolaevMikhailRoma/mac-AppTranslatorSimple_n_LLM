@@ -20,5 +20,11 @@ public final class TranslationService: Sendable {
         let result = try await provider.translate(text: text, from: sourceLang, to: targetLang)
         return (sourceLang, targetLang, result)
     }
+
+    /// Same, but the translation arrives in pieces.
+    public func stream(_ text: String) -> (source: String, target: String, pieces: AsyncThrowingStream<String, Error>) {
+        let (sourceLang, targetLang) = languageDetector.determineLanguageDirection(for: text)
+        return (sourceLang, targetLang, provider.translateStream(text: text, from: sourceLang, to: targetLang))
+    }
 }
 

@@ -37,8 +37,59 @@ public final class LLMProvider: TranslationProvider {
         return response
     }
 
+    /// Server-sent events: the server sends `data: {...}` lines while the model writes.
+    public func translateStream(text: String, from sourceLanguageCode: String, to targetLanguageCode: String)
+        -> AsyncThrowingStream<String, Error> {
+        AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    let messages = buildMessages(for: text, from: sourceLanguageCode, to: targetLanguageCode)
+                    let request = try makeRequest(try makeRequestPayload(messages: messages, stream: true))
+                    let (bytes, response) = try await session.bytes(for: request)
+                    try check(response)
+                    for try await line in bytes.lines {
+                        switch Self.parseEvent(line) {
+                        case .piece(let piece): continuation.yield(piece)
+                        case .done: continuation.finish(); return
+                        case .skip: continue
+                        }
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+
+    enum StreamEvent: Equatable {
+        case piece(String)
+        case done
+        case skip
+    }
+
+    /// One SSE line: a piece of the answer, the end marker, or something to ignore (comments, empty pieces).
+    static func parseEvent(_ line: String) -> StreamEvent {
+        guard line.hasPrefix("data:") else { return .skip }
+        let payload = line.dropFirst(5).trimmingCharacters(in: .whitespaces)
+        if payload == "[DONE]" { return .done }
+        struct Delta: Decodable { let content: String? }
+        struct Choice: Decodable { let delta: Delta?; let finish_reason: String? }
+        struct Chunk: Decodable { let choices: [Choice] }
+        guard let chunk = try? JSONDecoder().decode(Chunk.self, from: Data(payload.utf8)),
+              let content = chunk.choices.first?.delta?.content, !content.isEmpty else { return .skip }
+        return .piece(content)
+    }
+
     // MARK: - Networking helpers
     private func post(_ body: Data) async throws -> Data {
+        let (data, response) = try await session.data(for: try makeRequest(body))
+        try check(response)
+        return data
+    }
+
+    private func makeRequest(_ body: Data) throws -> URLRequest {
         guard let endpoint = host.chatCompletionsURL else {
             throw NSError(domain: "LLMProvider", code: 100,
                           userInfo: [NSLocalizedDescriptionKey: "Invalid server URL in Settings: \(host.baseURL)"])
@@ -53,13 +104,15 @@ public final class LLMProvider: TranslationProvider {
         }
 
         request.httpBody = body
-        let (data, response) = try await session.data(for: request)
+        return request
+    }
+
+    private func check(_ response: URLResponse) throws {
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
             throw NSError(domain: "LLMProvider", code: statusCode,
                           userInfo: [NSLocalizedDescriptionKey: "The API endpoint is not reachable or returned an error. Status: \(statusCode)"])
         }
-        return data
     }
 
     func extractAnswer(from data: Data) throws -> String {
@@ -75,8 +128,9 @@ public final class LLMProvider: TranslationProvider {
     }
 
     // MARK: - Payload builder
-    func makeRequestPayload(messages: [[String: String]]) throws -> Data {
+    func makeRequestPayload(messages: [[String: String]], stream: Bool = false) throws -> Data {
         var dict = requestBody.toDictionary()
+        dict["stream"] = stream
 
         let model = host.model.trimmingCharacters(in: .whitespacesAndNewlines)
         if !model.isEmpty {
