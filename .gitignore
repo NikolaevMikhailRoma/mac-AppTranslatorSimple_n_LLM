@@ -4,16 +4,9 @@
 *.app/
 *.app.zip
 
-# Old Xcode project, kept locally until the SwiftPM build is confirmed
-LLMTranslator_mac.xcodeproj/
-LLMTranslator_macTests/
-LLMTranslator_macUITests/
-
 # Agent and editor notes
 *task_list.md
-.cursor*
 .claude
-GEMINI.md
 
 .DS_Store
 
