@@ -47,7 +47,9 @@ Run the unit tests with `swift test` (pure logic lives in the
 
 ## Version history
 
-0.0.3 is the third implementation; the first two were never released.
+- **0.0.3** — moved to SwiftPM: builds from a clone with `./build.sh`, unit tests.
+- **0.0.2** — any OpenAI-compatible API instead of LM Studio only.
+- **0.0.1** — first prototype (Xcode project, not buildable from the repo).
 
 ## License
 
