@@ -94,10 +94,20 @@ final class ClaudeCodeTests: XCTestCase {
         XCTAssertFalse(arguments.contains("--effort"))
     }
 
-    func testNoAPIKeyReachesClaudeCode() {
-        setenv("ANTHROPIC_API_KEY", "sk-test", 1)
-        defer { unsetenv("ANTHROPIC_API_KEY") }
-        XCTAssertNil(ClaudeCode.environment()["ANTHROPIC_API_KEY"])
+    /// The app started from a Claude Code session in a Dropbox folder.
+    func testOnlyALoginEnvironmentReachesClaudeCode() {
+        let environment = ClaudeCode.environment(from: [
+            "HOME": "/Users/u", "TMPDIR": "/tmp/u/", "LANG": "en_US.UTF-8",
+            "PWD": "/Users/u/Dropbox/projects", "CLAUDECODE": "1", "CLAUDE_CODE_CHILD_SESSION": "1",
+            "ANTHROPIC_API_KEY": "sk-test", "PATH": "/Users/u/bin",
+        ])
+        XCTAssertEqual(environment["HOME"], "/Users/u")
+        XCTAssertEqual(environment["LANG"], "en_US.UTF-8")
+        XCTAssertNil(environment["CLAUDECODE"])
+        XCTAssertNil(environment["CLAUDE_CODE_CHILD_SESSION"])
+        XCTAssertNil(environment["ANTHROPIC_API_KEY"])
+        XCTAssertFalse(environment["PWD"]!.contains("Dropbox"))
+        XCTAssertFalse(environment["PATH"]!.contains("/Users/u/bin"))
     }
 
     func testFind() throws {

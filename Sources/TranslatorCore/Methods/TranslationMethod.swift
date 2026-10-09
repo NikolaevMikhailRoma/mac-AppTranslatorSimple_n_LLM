@@ -34,14 +34,17 @@ public enum TranslationMethod: String, Codable, CaseIterable, Identifiable, Send
         }
     }
 
-    /// Whether the engine must be told the source. An LLM reads any language, so text that is not
-    /// Cyrillic stays `auto`; the system translator (and web APIs) get the second language instead.
-    var needsSource: Bool {
+    /// LLMs work alike: a prompt with the target language, any source language. Settings groups them.
+    public var isLLM: Bool {
         switch self {
-        case .localLLM, .claude: return false
-        case .appleTranslation: return true
+        case .localLLM, .claude: return true
+        case .appleTranslation: return false
         }
     }
+
+    /// Whether the engine must be told the source. An LLM reads any language, so text that is not
+    /// Cyrillic stays `auto`; the system translator (and web APIs) get the second language instead.
+    var needsSource: Bool { !isLLM }
 
     /// Whether spaces and newlines around the answer are dropped (the LLM's Advanced setting).
     func trimsAnswer(_ settings: Settings) -> Bool {

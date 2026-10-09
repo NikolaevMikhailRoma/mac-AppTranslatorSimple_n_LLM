@@ -99,11 +99,16 @@ public struct ClaudeCode: Sendable {
                                 "--verbose"] + isolation
     static let infoRequest = #"{"type":"control_request","request_id":"info","request":{"subtype":"initialize"}}"# + "\n"
 
-    /// The app's environment without an API key: Claude Code would bill a key it finds there
-    /// instead of the subscription.
-    static func environment() -> [String: String] {
-        var environment = ProcessInfo.processInfo.environment
-        environment["ANTHROPIC_API_KEY"] = nil
+    /// Only what a login gives, not the app's whole environment: an app started from a terminal
+    /// carries that terminal's folder (`PWD`, in a cloud folder → a macOS access prompt) and, from a
+    /// Claude Code session, variables that make `claude` act as part of that session. No API key
+    /// either: Claude Code would bill a key instead of the subscription.
+    static let passedVariables = ["HOME", "USER", "LOGNAME", "SHELL", "TMPDIR", "LANG", "LC_ALL", "LC_CTYPE"]
+
+    static func environment(from app: [String: String] = ProcessInfo.processInfo.environment) -> [String: String] {
+        var environment = app.filter { passedVariables.contains($0.key) }
+        environment["PATH"] = "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/usr/local/bin"
+        environment["PWD"] = FileManager.default.temporaryDirectory.path
         return environment
     }
 }
