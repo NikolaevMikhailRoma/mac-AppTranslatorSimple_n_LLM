@@ -57,6 +57,16 @@ final class TranslationPipelineTests: XCTestCase {
         XCTAssertEqual(TranslationPipeline.start("Привет", settings: settings, provider: Recorder()).target, "de")
     }
 
+    func testMethodsThatNeedASourceGetTheSecondLanguage() {
+        var settings = Settings()
+        XCTAssertNil(TranslationPipeline.start("Hello", settings: settings, provider: Recorder()).source, "the LLM reads any language")
+        settings.method = .appleTranslation
+        let job = TranslationPipeline.start("Hello", settings: settings, provider: Recorder())
+        XCTAssertEqual(job.source, "en")
+        XCTAssertEqual(job.target, "ru")
+        XCTAssertEqual(TranslationPipeline.start("Привет", settings: settings, provider: Recorder()).source, "ru")
+    }
+
     func testOnlyTheLLMTrimsItsAnswer() {
         var settings = Settings()
         settings.localLLM.trimAnswer = true

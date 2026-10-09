@@ -13,8 +13,8 @@ public enum TranslationMethod: String, Codable, CaseIterable, Identifiable, Send
 
     public var id: Self { self }
 
-    /// What Settings lists. macOS Translation works but is a prototype, not offered yet.
-    public static let offered: [TranslationMethod] = [.localLLM]
+    /// What Settings lists, in this order.
+    public static let offered: [TranslationMethod] = [.localLLM, .appleTranslation]
 
     public var title: String {
         switch self {
@@ -28,6 +28,15 @@ public enum TranslationMethod: String, Codable, CaseIterable, Identifiable, Send
         switch self {
         case .localLLM: return "cpu"
         case .appleTranslation: return "apple.logo"
+        }
+    }
+
+    /// Whether the engine must be told the source. An LLM reads any language, so text that is not
+    /// Cyrillic stays `auto`; the system translator (and web APIs) get the second language instead.
+    var needsSource: Bool {
+        switch self {
+        case .localLLM: return false
+        case .appleTranslation: return true
         }
     }
 

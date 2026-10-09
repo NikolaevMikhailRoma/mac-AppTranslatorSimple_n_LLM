@@ -4,7 +4,8 @@ import Foundation
 public struct TranslationJob: Sendable {
     /// The copied text after joining broken lines; also what sizes the popup.
     public let text: String
-    /// Known only for Cyrillic text; see `LanguageDetector`.
+    /// Known for Cyrillic text (see `LanguageDetector`); otherwise the second language if the method
+    /// needs a source, else nil.
     public let source: String?
     public let target: String
     /// Whether spaces and newlines around the answer are dropped (an Advanced setting of the method).
@@ -17,8 +18,9 @@ public struct TranslationJob: Sendable {
 public enum TranslationPipeline {
     public static func start(_ copied: String, settings: Settings, provider: TranslationProvider) -> TranslationJob {
         let text = settings.joinBrokenLines ? LineJoiner.join(copied) : copied
-        let (source, target) = LanguageDetector(language1: settings.language1, language2: settings.language2)
+        let (detected, target) = LanguageDetector(language1: settings.language1, language2: settings.language2)
             .direction(for: text)
+        let source = detected ?? (settings.method.needsSource ? settings.language2 : nil)
         let pieces = settings.developer.streamLLM
             ? provider.translateStream(text: text, from: source, to: target)
             : provider.translateOnce(text: text, from: source, to: target)
