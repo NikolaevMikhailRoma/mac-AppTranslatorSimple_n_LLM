@@ -7,10 +7,6 @@ struct LocalLLMSettingsView: View {
     let language1: String
     let language2: String
 
-    private func firstLine(_ target: String) -> String {
-        Prompt.render(settings.prompt, target: target).split(separator: "\n").first.map(String.init) ?? ""
-    }
-
     /// What the server answered on /v1/models; nil until asked.
     @State private var models: [String]?
     @State private var modelsError: String?
@@ -42,28 +38,7 @@ struct LocalLLMSettingsView: View {
                 .foregroundStyle(modelsError == nil ? Color.secondary : Color.red)
                 .fixedSize(horizontal: false, vertical: true)
 
-            HStack {
-                Text("Prompt")
-                Spacer()
-                Button("Reset") { settings.prompt = Prompt.standard }
-                    .disabled(settings.prompt == Prompt.standard)
-            }
-            .padding(.top, 10)
-            TextEditor(text: $settings.prompt)
-                .font(.system(.body, design: .monospaced))
-                .frame(minHeight: 90)
-                .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color(nsColor: .separatorColor)))
-            if Prompt.namesLanguage(settings.prompt) {
-                Text("\(Prompt.placeholder) becomes the language code from General: \(language1) for most text, \(language2) for mostly Cyrillic text. The model gets, for example: “\(firstLine(language2))”")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            } else {
-                Text("The prompt has no \(Prompt.placeholder): the model is not told which language to translate into.")
-                    .font(.caption)
-                    .foregroundStyle(.orange)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+            PromptEditor(prompt: $settings.prompt, language1: language1, language2: language2)
 
             SectionHeader(title: "Advanced")
             FormRow(label: "Max answer length, tokens", help: "The longest translation the model may write. A token is about ¾ of an English word or half a Russian one. The arrows step by powers of two; any number can be typed.") {

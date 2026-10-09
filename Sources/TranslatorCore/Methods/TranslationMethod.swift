@@ -9,16 +9,18 @@ import Foundation
 public enum TranslationMethod: String, Codable, CaseIterable, Identifiable, Sendable {
     /// Stored as "host", its name before 0.0.4's refactoring.
     case localLLM = "host"
+    case claude
     case appleTranslation = "apple"
 
     public var id: Self { self }
 
-    /// What Settings lists, in this order.
-    public static let offered: [TranslationMethod] = [.localLLM, .appleTranslation]
+    /// What Settings lists, in this order: the LLMs, then the rest.
+    public static let offered: [TranslationMethod] = [.localLLM, .claude, .appleTranslation]
 
     public var title: String {
         switch self {
         case .localLLM: return "Local LLM / own host"
+        case .claude: return "Claude subscription"
         case .appleTranslation: return "macOS Translation"
         }
     }
@@ -27,6 +29,7 @@ public enum TranslationMethod: String, Codable, CaseIterable, Identifiable, Send
     public var symbol: String {
         switch self {
         case .localLLM: return "cpu"
+        case .claude: return "sparkle"
         case .appleTranslation: return "apple.logo"
         }
     }
@@ -35,7 +38,7 @@ public enum TranslationMethod: String, Codable, CaseIterable, Identifiable, Send
     /// Cyrillic stays `auto`; the system translator (and web APIs) get the second language instead.
     var needsSource: Bool {
         switch self {
-        case .localLLM: return false
+        case .localLLM, .claude: return false
         case .appleTranslation: return true
         }
     }
@@ -44,7 +47,7 @@ public enum TranslationMethod: String, Codable, CaseIterable, Identifiable, Send
     func trimsAnswer(_ settings: Settings) -> Bool {
         switch self {
         case .localLLM: return settings.localLLM.trimAnswer
-        case .appleTranslation: return false
+        case .claude, .appleTranslation: return false
         }
     }
 }

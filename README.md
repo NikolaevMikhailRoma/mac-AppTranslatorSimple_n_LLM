@@ -27,7 +27,7 @@ translation pops up next to the cursor. No Dock icon, no main window.
 | Local LLM or your own host — any OpenAI-compatible Chat Completions API | ✅ |
 | Google Translate API | not implemented |
 | DeepL API | not implemented |
-| Claude subscription | not implemented |
+| Claude subscription (through Claude Code, no API key) | ✅ |
 | macOS built-in Translation | ✅ |
 
 The local LLM method talks to `http://127.0.0.1:1234/v1` (LM Studio's default)
@@ -36,6 +36,15 @@ maximum answer length are set there too.
 
 Tested with Qwen 3.5 9B in LM Studio (thinking turned off in the model's
 settings in LM Studio) on a MacBook Pro M1 Max, 64 GB.
+
+The Claude method uses your Claude plan (Pro, Max, Team or Enterprise) and
+counts toward its usage limits. Set it up once in Terminal:
+
+1. Install Claude Code: `curl -fsSL https://claude.ai/install.sh | bash`
+   (or `brew install --cask claude-code`).
+2. Run `claude` and sign in with your Claude account in the browser.
+
+Then pick it in Settings → Translation, with the model and effort.
 
 ## Settings
 
