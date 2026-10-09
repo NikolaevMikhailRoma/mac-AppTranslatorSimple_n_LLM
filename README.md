@@ -28,7 +28,7 @@ translation pops up next to the cursor. No Dock icon, no main window.
 | Google Translate API | not implemented |
 | DeepL API | not implemented |
 | Claude subscription | not implemented |
-| macOS built-in Translation | not implemented |
+| macOS built-in Translation | ✅ |
 
 The local LLM method talks to `http://127.0.0.1:1234/v1` (LM Studio's default)
 unless you change the server URL in Settings. The model, the prompt and the
