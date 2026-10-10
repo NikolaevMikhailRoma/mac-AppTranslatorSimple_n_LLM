@@ -2,7 +2,7 @@
 
 All notable changes, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [0.0.6] — 2026-10-11
 
 ### Added
 - Google Translate method: Google's free web endpoint, no key or account. The source language comes
@@ -73,6 +73,7 @@ All notable changes, newest first. The format follows [Keep a Changelog](https:/
 ### Added
 - First prototype: ⌘C C translates EN↔RU with a local model in LM Studio (Xcode project, not buildable from the repo).
 
+[0.0.6]: https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/compare/v0.0.4...v0.0.5
 [0.0.4]: https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/compare/v0.0.3...v0.0.4
 [0.0.3]: https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/compare/v0.0.2...v0.0.3

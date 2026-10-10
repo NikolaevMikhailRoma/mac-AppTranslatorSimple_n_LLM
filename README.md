@@ -100,6 +100,7 @@ Run the unit tests with `swift test` (pure logic lives in the
 
 What changed in each version: [CHANGELOG.md](CHANGELOG.md).
 
+- **0.0.6** — Google Translate and DeepL methods (free endpoints, no key), About and Quit at the bottom of Settings.
 - **0.0.5** — Claude subscription and macOS Translation methods, method menu, no App Sandbox (settings reset once), version in the app.
 - **0.0.4** — Settings window, streaming, model list from the server, joining broken lines, screenshots.
 - **0.0.3** — moved to SwiftPM: builds from a clone with `./build.sh`, unit tests.
