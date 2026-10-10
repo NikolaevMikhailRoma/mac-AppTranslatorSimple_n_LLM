@@ -8,6 +8,7 @@ extension TranslationMethod {
         case .localLLM: return LocalLLMProvider(settings: settings.localLLM)
         case .claude: return ClaudeProvider(settings: settings.claude)
         case .appleTranslation: return AppleTranslationProvider()
+        case .google: return GoogleTranslateProvider()
         }
     }
 }

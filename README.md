@@ -31,7 +31,7 @@ translation pops up next to the cursor. No Dock icon, no main window.
 | Method | Status |
 | --- | --- |
 | Local LLM or your own host — any OpenAI-compatible Chat Completions API | ✅ |
-| Google Translate API | not implemented |
+| Google Translate (free web endpoint, no key) | ⚠️ works, but Google often refuses with "too many requests"; to be tested later |
 | DeepL API | not implemented |
 | Claude subscription (through Claude Code, no API key) | ✅ |
 | macOS built-in Translation | ✅ |
