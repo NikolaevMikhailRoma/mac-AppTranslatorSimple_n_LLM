@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- No App Sandbox: the Claude method runs Claude Code (~/.local/bin/claude), which needs the
+     user's home folder and Keychain; a sandboxed app passes its sandbox on to it. -->
 <plist version="1.0">
-<dict>
-	<key>com.apple.security.app-sandbox</key>
-	<true/>
-	<key>com.apple.security.files.user-selected.read-only</key>
-	<true/>
-	<key>com.apple.security.network.client</key>
-	<true/>
-</dict>
+<dict/>
 </plist>

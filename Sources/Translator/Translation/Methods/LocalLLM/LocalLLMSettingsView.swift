@@ -7,10 +7,6 @@ struct LocalLLMSettingsView: View {
     let language1: String
     let language2: String
 
-    private func firstLine(_ target: String) -> String {
-        Prompt.render(settings.prompt, target: target).split(separator: "\n").first.map(String.init) ?? ""
-    }
-
     /// What the server answered on /v1/models; nil until asked.
     @State private var models: [String]?
     @State private var modelsError: String?
@@ -22,48 +18,29 @@ struct LocalLLMSettingsView: View {
                     .frame(width: 230)
             }
             FormRow(label: "Model") {
-                TextField("", text: $settings.model, prompt: Text("Loaded on the server"))
-                    .frame(width: 196)
-                Menu {
-                    Button("Loaded on the server") { settings.model = "" }
-                    if let models, !models.isEmpty {
-                        Divider()
-                        ForEach(models, id: \.self) { id in Button(id) { settings.model = id } }
+                Picker("", selection: $settings.model) {
+                    Text("First on the server").tag("")
+                    if !settings.model.isEmpty, !(models ?? []).contains(settings.model) {
+                        Text("\(settings.model) (not on the server)").tag(settings.model)
                     }
-                } label: {
-                    Image(systemName: "list.bullet")
+                    ForEach(models ?? [], id: \.self) { id in Text(id).tag(id) }
                 }
-                .menuStyle(.borderlessButton)
-                .fixedSize()
-                .help("Models the server offers")
+                .labelsHidden()
+                .frame(width: 196)
+                Button {
+                    Task { await loadModels() }
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                }
+                .buttonStyle(.borderless)
+                .help("Ask the server for its models again")
             }
-            Text(modelsError ?? "Any OpenAI-compatible server: LM Studio, Ollama, llama.cpp. Pick a model when the server has several loaded.")
+            Text(modelsError ?? "Any OpenAI-compatible server: LM Studio, Ollama, llama.cpp. The list is what the server offers; “First on the server” takes the top one.")
                 .font(.caption)
                 .foregroundStyle(modelsError == nil ? Color.secondary : Color.red)
                 .fixedSize(horizontal: false, vertical: true)
 
-            HStack {
-                Text("Prompt")
-                Spacer()
-                Button("Reset") { settings.prompt = Prompt.standard }
-                    .disabled(settings.prompt == Prompt.standard)
-            }
-            .padding(.top, 10)
-            TextEditor(text: $settings.prompt)
-                .font(.system(.body, design: .monospaced))
-                .frame(minHeight: 90)
-                .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color(nsColor: .separatorColor)))
-            if Prompt.namesLanguage(settings.prompt) {
-                Text("\(Prompt.placeholder) becomes the language code from General: \(language1) for most text, \(language2) for mostly Cyrillic text. The model gets, for example: “\(firstLine(language2))”")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            } else {
-                Text("The prompt has no \(Prompt.placeholder): the model is not told which language to translate into.")
-                    .font(.caption)
-                    .foregroundStyle(.orange)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+            PromptEditor(prompt: $settings.prompt, language1: language1, language2: language2)
 
             SectionHeader(title: "Advanced")
             FormRow(label: "Max answer length, tokens", help: "The longest translation the model may write. A token is about ¾ of an English word or half a Russian one. The arrows step by powers of two; any number can be typed.") {

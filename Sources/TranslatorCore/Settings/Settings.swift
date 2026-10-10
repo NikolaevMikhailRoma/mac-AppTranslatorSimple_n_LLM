@@ -26,6 +26,7 @@ public struct DeveloperSettings: Codable, Equatable, Sendable {
 public struct Settings: Codable, Equatable, Sendable {
     public var method: TranslationMethod = .localLLM
     public var localLLM = LocalLLMSettings()
+    public var claude = ClaudeSettings()
     /// Text is translated into language 1…
     public var language1 = "ru"
     /// …and mostly Cyrillic text into language 2.
@@ -38,7 +39,7 @@ public struct Settings: Codable, Equatable, Sendable {
 
     /// The stored names; some are older than the properties.
     enum CodingKeys: String, CodingKey {
-        case method, joinBrokenLines, copyTranslation, developer
+        case method, claude, joinBrokenLines, copyTranslation, developer
         case localLLM = "host"
         case language1 = "nativeLanguage"
         case language2 = "secondLanguage"

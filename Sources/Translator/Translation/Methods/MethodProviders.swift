@@ -6,6 +6,7 @@ extension TranslationMethod {
     func makeProvider(_ settings: Settings) -> TranslationProvider {
         switch self {
         case .localLLM: return LocalLLMProvider(settings: settings.localLLM)
+        case .claude: return ClaudeProvider(settings: settings.claude)
         case .appleTranslation: return AppleTranslationProvider()
         }
     }

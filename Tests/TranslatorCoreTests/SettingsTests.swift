@@ -10,6 +10,16 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(settings.localLLM.baseURL, "http://127.0.0.1:1234/v1")
     }
 
+    /// Settings saved before the Claude method keep everything and get its defaults.
+    func testClaudeDefaultsForOlderSettings() {
+        let s = Settings.decode(from: Data(#"{"method":"apple","secondLanguage":"de"}"#.utf8))
+        XCTAssertEqual(s.method, .appleTranslation)
+        XCTAssertEqual(s.language2, "de")
+        XCTAssertEqual(s.claude, ClaudeSettings())
+        XCTAssertEqual(s.claude.model, "haiku")
+        XCTAssertEqual(s.claude.prompt, Prompt.standard)
+    }
+
     func testRoundTrip() throws {
         var settings = Settings()
         settings.localLLM.model = "qwen"

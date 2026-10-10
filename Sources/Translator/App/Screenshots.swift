@@ -5,15 +5,22 @@ import TranslatorCore
 /// `AppTranslatorSimple --screenshots <folder>`: draws the Settings tabs and a translation popup into PNGs
 /// for the README, in the light and the dark appearance (`-dark` suffix). Rendered offscreen, so no
 /// Screen Recording permission is needed; default settings, so every run gives the same pictures.
+/// `--methods` is for checking the panels, not for the README: the Translation tab of every method too
+/// (`settings-translation-<method>.png`), in the system appearance only.
 @MainActor
 enum Screenshots {
-    static func render(to folder: URL) {
+    static func render(to folder: URL, methods: Bool = false) {
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-        render(to: folder, appearance: .aqua, suffix: "")
-        render(to: folder, appearance: .darkAqua, suffix: "-dark")
+        if methods {
+            let dark = NSApp.effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+            render(to: folder, appearance: dark ? .darkAqua : .aqua, suffix: dark ? "-dark" : "", methods: true)
+            return
+        }
+        render(to: folder, appearance: .aqua, suffix: "", methods: false)
+        render(to: folder, appearance: .darkAqua, suffix: "-dark", methods: false)
     }
 
-    private static func render(to folder: URL, appearance name: NSAppearance.Name, suffix: String) {
+    private static func render(to folder: URL, appearance name: NSAppearance.Name, suffix: String, methods: Bool) {
         let appearance = NSAppearance(named: name)!
         // Window appearance alone is not enough: some AppKit controls (the tab bar) draw in the app's appearance.
         NSApp.appearance = appearance
@@ -34,6 +41,15 @@ enum Screenshots {
             let frameView = settings.window.contentView!.superview!
             save(frameView, appearance: appearance, windowCorner: 10, to: folder.appendingPathComponent("settings-\(item.label.lowercased())\(suffix).png"))
         }
+        if methods, let tab = settings.tabs.tabViewItems.first(where: { $0.label == "Translation" }) {
+            settings.tabs.selectTabViewItem(tab)
+            for method in TranslationMethod.offered {
+                store.settings.method = method
+                settle(for: 3)    // panels may ask their engine first: Claude Code answers in about 2 s
+                save(settings.window.contentView!.superview!, appearance: appearance, windowCorner: 10,
+                     to: folder.appendingPathComponent("settings-translation-\(method.rawValue)\(suffix).png"))
+            }
+        }
 
         settings.window.orderOut(nil)
 
@@ -50,8 +66,8 @@ enum Screenshots {
     }
 
     /// Let SwiftUI and AppKit finish layout before drawing.
-    private static func settle() {
-        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+    private static func settle(for seconds: TimeInterval = 0.3) {
+        RunLoop.main.run(until: Date().addingTimeInterval(seconds))
     }
 
     /// - Parameter windowCorner: For a window: translucent parts (the tab bar) are see-through in the

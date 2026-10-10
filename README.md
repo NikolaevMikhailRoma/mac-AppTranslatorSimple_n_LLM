@@ -1,5 +1,11 @@
 # AppTranslatorSimple
 
+![macOS 15+](https://img.shields.io/badge/macOS-15%2B-black?logo=apple)
+![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)
+[![License](https://img.shields.io/github/license/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM)](https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/total)](https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/releases)
+
 <img src="assets/popup-dark.png" width="474" alt="Translation popup">
 
 A minimal native macOS menu bar translator. Copy text twice (⌘C C) and the
@@ -27,8 +33,8 @@ translation pops up next to the cursor. No Dock icon, no main window.
 | Local LLM or your own host — any OpenAI-compatible Chat Completions API | ✅ |
 | Google Translate API | not implemented |
 | DeepL API | not implemented |
-| Claude subscription | not implemented |
-| macOS built-in Translation | not implemented |
+| Claude subscription (through Claude Code, no API key) | ✅ |
+| macOS built-in Translation | ✅ |
 
 The local LLM method talks to `http://127.0.0.1:1234/v1` (LM Studio's default)
 unless you change the server URL in Settings. The model, the prompt and the
@@ -36,6 +42,15 @@ maximum answer length are set there too.
 
 Tested with Qwen 3.5 9B in LM Studio (thinking turned off in the model's
 settings in LM Studio) on a MacBook Pro M1 Max, 64 GB.
+
+The Claude method uses your Claude plan (Pro, Max, Team or Enterprise) and
+counts toward its usage limits. Set it up once in Terminal:
+
+1. Install Claude Code: `curl -fsSL https://claude.ai/install.sh | bash`
+   (or `brew install --cask claude-code`).
+2. Run `claude` and sign in with your Claude account in the browser.
+
+Then pick it in Settings → Translation, with the model and effort.
 
 ## Settings
 
@@ -80,6 +95,7 @@ Run the unit tests with `swift test` (pure logic lives in the
 
 What changed in each version: [CHANGELOG.md](CHANGELOG.md).
 
+- **0.0.5** — Claude subscription and macOS Translation methods, method menu, no App Sandbox (settings reset once), version in the app.
 - **0.0.4** — Settings window, streaming, model list from the server, joining broken lines, screenshots.
 - **0.0.3** — moved to SwiftPM: builds from a clone with `./build.sh`, unit tests.
 - **0.0.2** — any OpenAI-compatible API instead of LM Studio only.

@@ -13,7 +13,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_: Notification) {
         if let index = CommandLine.arguments.firstIndex(of: "--screenshots") {
             let folder = CommandLine.arguments.dropFirst(index + 1).first ?? "assets"
-            Screenshots.render(to: URL(fileURLWithPath: folder))
+            Screenshots.render(to: URL(fileURLWithPath: folder),
+                               methods: CommandLine.arguments.contains("--methods"))
             NSApp.terminate(nil)
             return
         }
