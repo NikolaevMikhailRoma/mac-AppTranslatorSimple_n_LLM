@@ -21,6 +21,14 @@ final class OpenAIClientTests: XCTestCase {
         XCTAssertEqual(try OpenAIClient.decodeModels(data), ["qwen/qwen3.5-9b", "gemma-3"])
     }
 
+    func testDecodesServerErrorMessage() {
+        let lmStudio = Data(#"{"error":{"message":"Multiple models are loaded. Please specify a model by providing a 'model' field.","type":"invalid_request_error"}}"#.utf8)
+        XCTAssertEqual(OpenAIClient.decodeErrorMessage(lmStudio),
+                       "Multiple models are loaded. Please specify a model by providing a 'model' field.")
+        XCTAssertEqual(OpenAIClient.decodeErrorMessage(Data(#"{"error":"model not found"}"#.utf8)), "model not found")
+        XCTAssertNil(OpenAIClient.decodeErrorMessage(Data("Bad Request".utf8)))
+    }
+
     func testURLs() {
         XCTAssertEqual(OpenAIClient(baseURL: "http://127.0.0.1:1234/v1").url("models")?.absoluteString,
                        "http://127.0.0.1:1234/v1/models")

@@ -41,7 +41,7 @@ public struct OpenAIClient: Sendable {
     public func complete(_ body: Data) async throws -> String {
         do {
             let (data, response) = try await session.data(for: try request("chat/completions", body: body))
-            try check(response)
+            try check(response, body: data)
             return try Self.decodeAnswer(data)
         } catch {
             throw explained(error)
@@ -54,7 +54,11 @@ public struct OpenAIClient: Sendable {
             let task = Task {
                 do {
                     let (bytes, response) = try await session.bytes(for: try request("chat/completions", body: body))
-                    try check(response)
+                    if Self.status(response) != 200 {
+                        var data = Data()
+                        for try await byte in bytes.prefix(4_096) { data.append(byte) }
+                        try check(response, body: data)
+                    }
                     for try await line in bytes.lines {
                         switch Self.parseEvent(line) {
                         case .piece(let piece): continuation.yield(piece)
@@ -80,7 +84,7 @@ public struct OpenAIClient: Sendable {
             var request = try request("models", body: nil)
             request.timeoutInterval = 5
             let (data, response) = try await session.data(for: request)
-            try check(response)
+            try check(response, body: data)
             return try Self.decodeModels(data)
         } catch {
             throw explained(error)
@@ -124,6 +128,17 @@ public struct OpenAIClient: Sendable {
         return try JSONDecoder().decode(Response.self, from: data).data.map(\.id)
     }
 
+    /// The server's own words from an error body: `{"error": {"message": …}}` or `{"error": "…"}`.
+    static func decodeErrorMessage(_ data: Data) -> String? {
+        struct Detail: Decodable { let message: String }
+        struct Nested: Decodable { let error: Detail }
+        struct Flat: Decodable { let error: String }
+        let decoder = JSONDecoder()
+        let message = (try? decoder.decode(Nested.self, from: data).error.message)
+            ?? (try? decoder.decode(Flat.self, from: data).error)
+        return message?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+    }
+
     // MARK: Plumbing
 
     /// `baseURL` + `path`, tolerating spaces and a trailing slash in what the user typed.
@@ -149,9 +164,15 @@ public struct OpenAIClient: Sendable {
         return request
     }
 
-    private func check(_ response: URLResponse) throws {
-        let status = (response as? HTTPURLResponse)?.statusCode ?? -1
-        guard status == 200 else { throw OpenAIClientError.http(status: status, server: baseURL) }
+    private static func status(_ response: URLResponse) -> Int {
+        (response as? HTTPURLResponse)?.statusCode ?? -1
+    }
+
+    private func check(_ response: URLResponse, body: Data) throws {
+        let status = Self.status(response)
+        guard status == 200 else {
+            throw OpenAIClientError.http(status: status, server: baseURL, message: Self.decodeErrorMessage(body))
+        }
     }
 
     /// Network failures become a sentence for the popup; cancellation passes through untouched.
@@ -171,7 +192,7 @@ public struct OpenAIClient: Sendable {
 public enum OpenAIClientError: LocalizedError, Equatable {
     case invalidURL(String)
     case unreachable(String)
-    case http(status: Int, server: String)
+    case http(status: Int, server: String, message: String?)
     case emptyAnswer
 
     public var errorDescription: String? {
@@ -180,10 +201,16 @@ public enum OpenAIClientError: LocalizedError, Equatable {
             return "The server URL in Settings is not valid: \(url)"
         case .unreachable(let url):
             return "No answer from \(url). Is LM Studio or another server running, with a model loaded?"
-        case .http(let status, let url):
+        case .http(let status, let url, let message?):
+            return "The server at \(url) answered with HTTP \(status): \(message)"
+        case .http(let status, let url, nil):
             return "The server at \(url) answered with HTTP \(status). Check the server URL and the model in Settings."
         case .emptyAnswer:
             return "The model sent an empty answer."
         }
     }
+}
+
+private extension String {
+    var nilIfEmpty: String? { isEmpty ? nil : self }
 }

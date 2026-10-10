@@ -16,11 +16,12 @@ final class LocalLLMProviderTests: XCTestCase {
         var settings = LocalLLMSettings()
         settings.model = "m"
         settings.maxTokens = 4_096
-        let data = try LocalLLMProvider(settings: settings).body(for: "Hi", to: "de", stream: false)
+        let data = try LocalLLMProvider(settings: settings).body(for: "Hi", to: "de", model: "m", stream: false)
         let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
         XCTAssertEqual(json["model"] as? String, "m")
         XCTAssertEqual(json["max_tokens"] as? Int, 4_096)
         XCTAssertEqual(json["stream"] as? Bool, false)
+        XCTAssertEqual(json["reasoning_effort"] as? String, "none")
     }
 }
 
@@ -34,5 +35,21 @@ final class PromptTests: XCTestCase {
         XCTAssertTrue(Prompt.namesLanguage(Prompt.standard))
         XCTAssertTrue(Prompt.namesLanguage("Mine {to}"))
         XCTAssertFalse(Prompt.namesLanguage("Translate."))
+    }
+}
+
+final class LocalLLMModelTests: XCTestCase {
+    func testModelFromSettingsWins() async {
+        var settings = LocalLLMSettings()
+        settings.model = " m "
+        let model = await LocalLLMProvider(settings: settings).model()
+        XCTAssertEqual(model, "m")
+    }
+
+    func testNoListMeansNoModel() async {
+        var settings = LocalLLMSettings()
+        settings.baseURL = "http://127.0.0.1:9/v1"    // nothing listens on port 9
+        let model = await LocalLLMProvider(settings: settings).model()
+        XCTAssertEqual(model, "")
     }
 }

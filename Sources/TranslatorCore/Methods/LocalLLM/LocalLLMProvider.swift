@@ -14,15 +14,33 @@ public final class LocalLLMProvider: TranslationProvider {
     }
 
     public func translate(text: String, from source: String?, to target: String) async throws -> String {
-        try await client.complete(body(for: text, to: target, stream: false))
+        try await client.complete(body(for: text, to: target, model: await model(), stream: false))
     }
 
     public func translateStream(text: String, from source: String?, to target: String) -> AsyncThrowingStream<String, Error> {
-        do {
-            return client.stream(try body(for: text, to: target, stream: true))
-        } catch {
-            return AsyncThrowingStream { $0.finish(throwing: error) }
+        AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    let body = try body(for: text, to: target, model: await model(), stream: true)
+                    for try await piece in client.stream(body) { continuation.yield(piece) }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { termination in
+                if case .cancelled = termination { task.cancel() }
+            }
         }
+    }
+
+    /// The model from Settings; when the field is empty, the first one the server lists.
+    /// LM Studio refuses a request without a model once it has two loaded.
+    /// If the list cannot be read, the request goes without a model and the server says what is wrong.
+    func model() async -> String {
+        let chosen = settings.model.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard chosen.isEmpty else { return chosen }
+        return (try? await client.models().first) ?? ""
     }
 
     func messages(for text: String, to target: String) -> [[String: String]] {
@@ -32,8 +50,12 @@ public final class LocalLLMProvider: TranslationProvider {
         ]
     }
 
-    func body(for text: String, to target: String, stream: Bool) throws -> Data {
-        try OpenAIClient.chatBody(model: settings.model, messages: messages(for: text, to: target),
-                                  maxTokens: settings.maxTokens, stream: stream)
+    /// No thinking before the translation: a reasoning model (Qwen 3.8 27B in LM Studio) otherwise spends
+    /// seconds in `reasoning_content`, which the popup does not show. Models that do not reason ignore it.
+    static var extra: [String: Any] { ["reasoning_effort": "none"] }
+
+    func body(for text: String, to target: String, model: String, stream: Bool) throws -> Data {
+        try OpenAIClient.chatBody(model: model, messages: messages(for: text, to: target),
+                                  maxTokens: settings.maxTokens, stream: stream, extra: Self.extra)
     }
 }

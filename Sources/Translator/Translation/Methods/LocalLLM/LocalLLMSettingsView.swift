@@ -18,22 +18,24 @@ struct LocalLLMSettingsView: View {
                     .frame(width: 230)
             }
             FormRow(label: "Model") {
-                TextField("", text: $settings.model, prompt: Text("Loaded on the server"))
-                    .frame(width: 196)
-                Menu {
-                    Button("Loaded on the server") { settings.model = "" }
-                    if let models, !models.isEmpty {
-                        Divider()
-                        ForEach(models, id: \.self) { id in Button(id) { settings.model = id } }
+                Picker("", selection: $settings.model) {
+                    Text("First on the server").tag("")
+                    if !settings.model.isEmpty, !(models ?? []).contains(settings.model) {
+                        Text("\(settings.model) (not on the server)").tag(settings.model)
                     }
-                } label: {
-                    Image(systemName: "list.bullet")
+                    ForEach(models ?? [], id: \.self) { id in Text(id).tag(id) }
                 }
-                .menuStyle(.borderlessButton)
-                .fixedSize()
-                .help("Models the server offers")
+                .labelsHidden()
+                .frame(width: 196)
+                Button {
+                    Task { await loadModels() }
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                }
+                .buttonStyle(.borderless)
+                .help("Ask the server for its models again")
             }
-            Text(modelsError ?? "Any OpenAI-compatible server: LM Studio, Ollama, llama.cpp. Pick a model when the server has several loaded.")
+            Text(modelsError ?? "Any OpenAI-compatible server: LM Studio, Ollama, llama.cpp. The list is what the server offers; “First on the server” takes the top one.")
                 .font(.caption)
                 .foregroundStyle(modelsError == nil ? Color.secondary : Color.red)
                 .fixedSize(horizontal: false, vertical: true)
