@@ -18,6 +18,8 @@ final class StatusItemController: NSObject {
 
         item.button?.image = Self.idleIcon
         let menu = NSMenu()
+        let about = menu.addItem(withTitle: "About \(appName)", action: #selector(aboutChosen), keyEquivalent: "")
+        about.target = self
         let settings = menu.addItem(withTitle: "Settings…", action: #selector(settingsChosen), keyEquivalent: ",")
         settings.target = self
         menu.addItem(.separator())
@@ -26,6 +28,8 @@ final class StatusItemController: NSObject {
     }
 
     @objc private func settingsChosen() { openSettings() }
+
+    @objc private func aboutChosen() { AboutPanel.show() }
 
     private func updateIcon() {
         // The menu bar ignores contentTintColor on template images (it turns black),
