@@ -20,6 +20,12 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(s.claude.prompt, Prompt.standard)
     }
 
+    /// A field missing from `Settings.CodingKeys` (a new method's settings) would never be saved.
+    func testEveryFieldIsStored() throws {
+        let stored = try JSONSerialization.jsonObject(with: JSONEncoder().encode(Settings())) as! [String: Any]
+        XCTAssertEqual(stored.count, Mirror(reflecting: Settings()).children.count)
+    }
+
     func testRoundTrip() throws {
         var settings = Settings()
         settings.localLLM.model = "qwen"

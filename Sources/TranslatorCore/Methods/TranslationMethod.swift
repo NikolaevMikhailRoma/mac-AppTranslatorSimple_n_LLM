@@ -3,34 +3,32 @@ import Foundation
 /// A way to get a translation, as Settings lists it. What runs it, the `TranslationProvider`,
 /// is made by the app: some engines (the system translator) need a window to work in.
 ///
-/// Adding a method: a case here; if it has settings, a struct in `Methods/<Name>/` and a field
-/// in `Settings`; in the app, its provider and its panel under `Translation/Methods/<Name>/`.
-/// The compiler points at every `switch` that needs the new case.
+/// Adding a method: a case here and in `offered`; its provider in `Methods/<Name>/`, in the app's
+/// `Translation/Methods/<Name>/` only if it needs a window; a line in `makeProvider`; its panel in
+/// the app. Settings, if any: a struct next to the provider, a field and a key in `Settings`.
+/// The compiler points at every `switch` that needs the new case. A web API is not an LLM: it gets
+/// the source language, its answer in one piece (the protocol's default) and its errors as
+/// `LocalizedError`, like `AppleTranslationProvider`.
 public enum TranslationMethod: String, Codable, CaseIterable, Identifiable, Sendable {
     /// Stored as "host", its name before 0.0.4's refactoring.
     case localLLM = "host"
     case claude
     case appleTranslation = "apple"
+    case google
+    case deepL = "deepl"
 
     public var id: Self { self }
 
-    /// What Settings lists, in this order: the LLMs, then the rest.
-    public static let offered: [TranslationMethod] = [.localLLM, .claude, .appleTranslation]
+    /// What Settings lists, in this order: the LLMs, then the rest. A method still in the works stays out.
+    public static let offered: [TranslationMethod] = [.localLLM, .claude, .appleTranslation, .google, .deepL]
 
     public var title: String {
         switch self {
         case .localLLM: return "Local LLM / own host"
         case .claude: return "Claude subscription"
         case .appleTranslation: return "macOS Translation"
-        }
-    }
-
-    /// SF Symbol shown next to the title in Settings.
-    public var symbol: String {
-        switch self {
-        case .localLLM: return "cpu"
-        case .claude: return "sparkle"
-        case .appleTranslation: return "apple.logo"
+        case .google: return "Google Translate"
+        case .deepL: return "DeepL"
         }
     }
 
@@ -38,7 +36,7 @@ public enum TranslationMethod: String, Codable, CaseIterable, Identifiable, Send
     public var isLLM: Bool {
         switch self {
         case .localLLM, .claude: return true
-        case .appleTranslation: return false
+        case .appleTranslation, .google, .deepL: return false
         }
     }
 
@@ -50,7 +48,7 @@ public enum TranslationMethod: String, Codable, CaseIterable, Identifiable, Send
     func trimsAnswer(_ settings: Settings) -> Bool {
         switch self {
         case .localLLM: return settings.localLLM.trimAnswer
-        case .claude, .appleTranslation: return false
+        case .claude, .appleTranslation, .google, .deepL: return false
         }
     }
 }

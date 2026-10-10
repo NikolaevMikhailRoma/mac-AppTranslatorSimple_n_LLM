@@ -67,6 +67,11 @@ final class TranslationPipelineTests: XCTestCase {
         XCTAssertEqual(job.source, "en")
         XCTAssertEqual(job.target, "ru")
         XCTAssertEqual(TranslationPipeline.start("Привет", settings: settings, provider: Recorder()).source, "ru")
+        settings.method = .google
+        XCTAssertEqual(TranslationPipeline.start("Hello", settings: settings, provider: Recorder()).source, "en", "Google too")
+        XCTAssertEqual(TranslationPipeline.start("Привет", settings: settings, provider: Recorder()).source, "ru")
+        settings.method = .deepL
+        XCTAssertEqual(TranslationPipeline.start("Hello", settings: settings, provider: Recorder()).source, "en", "DeepL too")
     }
 
     func testOnlyTheLLMTrimsItsAnswer() {
@@ -92,5 +97,9 @@ final class TranslationPipelineTests: XCTestCase {
         let data = try! JSONEncoder().encode(settings)
         XCTAssertEqual(Settings.decode(from: data).method, .appleTranslation)
         XCTAssertTrue(String(decoding: data, as: UTF8.self).contains(#""method":"apple""#))
+        settings.method = .google
+        XCTAssertEqual(Settings.decode(from: try! JSONEncoder().encode(settings)).method, .google)
+        settings.method = .deepL
+        XCTAssertTrue(String(decoding: try! JSONEncoder().encode(settings), as: UTF8.self).contains(#""method":"deepl""#))
     }
 }

@@ -2,6 +2,17 @@
 
 All notable changes, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.0.6] — 2026-10-11
+
+### Added
+- Google Translate method: Google's free web endpoint, no key or account. The source language comes
+  from the app, as for macOS Translation. Many translations in a row may be refused for a while.
+- DeepL method, the same way: DeepL's free endpoint, no key or account, up to 1,500 characters per translation.
+
+### Changed
+- About moved from the menu bar icon's menu to the Settings window: About at the bottom left, Quit at the bottom right. The version and the What's new link are only in About now.
+- The method menu in Settings → Translation lists names only, without icons.
+
 ## [0.0.5] — 2026-10-10
 
 ### Added
@@ -62,6 +73,7 @@ All notable changes, newest first. The format follows [Keep a Changelog](https:/
 ### Added
 - First prototype: ⌘C C translates EN↔RU with a local model in LM Studio (Xcode project, not buildable from the repo).
 
+[0.0.6]: https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/compare/v0.0.4...v0.0.5
 [0.0.4]: https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/compare/v0.0.3...v0.0.4
 [0.0.3]: https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/compare/v0.0.2...v0.0.3

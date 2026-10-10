@@ -26,13 +26,15 @@ struct TranslationTab: View {
                                              language2: store.settings.language2)
             case .appleTranslation: AppleTranslationSettingsView(language1: store.settings.language1,
                                                                  language2: store.settings.language2)
+            case .google: GoogleTranslateSettingsView()
+            case .deepL: DeepLSettingsView()
             }
         }
     }
 
     private func items(_ methods: [TranslationMethod]) -> some View {
         ForEach(methods) { method in
-            Label(method.title, systemImage: method.symbol).tag(method)
+            Text(method.title).tag(method)
         }
     }
 }

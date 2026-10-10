@@ -36,17 +36,6 @@ struct GeneralTab: View {
                     .labelsHidden()
             }
 
-            SectionHeader(title: "Application")
-            HStack(spacing: 4) {
-                Text("Version \(appVersion)").foregroundStyle(.secondary)
-                if let changelog = AppLinks.changelog {
-                    Text("·").foregroundStyle(.secondary)
-                    Link("What's new", destination: changelog)
-                }
-            }
-            .font(.caption)
-            .padding(.bottom, 6)
-            Button("Quit \(appName)") { NSApp.terminate(nil) }
         }
     }
 }

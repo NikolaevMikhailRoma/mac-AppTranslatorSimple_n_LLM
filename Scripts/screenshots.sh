@@ -6,6 +6,5 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 swift build
-APP_VERSION=$(plutil -extract version raw app.json) \
-    APP_REPOSITORY=$(plutil -extract repository raw app.json) \
+APP_REPOSITORY=$(plutil -extract repository raw app.json) \
     .build/debug/AppTranslatorSimple --screenshots "${1:-assets}"

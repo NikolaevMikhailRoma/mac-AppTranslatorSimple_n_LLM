@@ -31,10 +31,15 @@ translation pops up next to the cursor. No Dock icon, no main window.
 | Method | Status |
 | --- | --- |
 | Local LLM or your own host — any OpenAI-compatible Chat Completions API | ✅ |
-| Google Translate API | not implemented |
-| DeepL API | not implemented |
+| Google Translate (free web endpoint, no key) | ⚠️ works, but Google often refuses with "too many requests"; to be tested later |
+| DeepL (free endpoint, no key) | ⚠️ works, with limits: up to 1,500 characters per translation; many requests in a row may be refused |
 | Claude subscription (through Claude Code, no API key) | ✅ |
 | macOS built-in Translation | ✅ |
+
+Google Translate and DeepL use the free endpoints of their own web page and
+browser extension: no key and no account, but they are not official APIs.
+They may refuse many translations in a row for a while, or stop working
+without notice; DeepL also takes at most 1,500 characters at a time.
 
 The local LLM method talks to `http://127.0.0.1:1234/v1` (LM Studio's default)
 unless you change the server URL in Settings. The model, the prompt and the
@@ -95,6 +100,7 @@ Run the unit tests with `swift test` (pure logic lives in the
 
 What changed in each version: [CHANGELOG.md](CHANGELOG.md).
 
+- **0.0.6** — Google Translate and DeepL methods (free endpoints, no key), About and Quit at the bottom of Settings.
 - **0.0.5** — Claude subscription and macOS Translation methods, method menu, no App Sandbox (settings reset once), version in the app.
 - **0.0.4** — Settings window, streaming, model list from the server, joining broken lines, screenshots.
 - **0.0.3** — moved to SwiftPM: builds from a clone with `./build.sh`, unit tests.

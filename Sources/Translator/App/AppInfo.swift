@@ -9,8 +9,6 @@ private func appConfig(_ key: String, env: String) -> String? {
     (Bundle.main.infoDictionary?[key] as? String) ?? ProcessInfo.processInfo.environment[env]
 }
 
-let appVersion = appConfig("CFBundleShortVersionString", env: "APP_VERSION") ?? "dev"
-
 /// Nil without "repository" in app.json; the links are then left out.
 enum AppLinks {
     static let repository = appConfig("AppRepository", env: "APP_REPOSITORY").flatMap { URL(string: $0) }
