@@ -14,7 +14,7 @@ struct TranslationBubble: View {
                 .frame(width: model.size.width, height: model.size.height)
         }
         .padding(12)
-        .background(.regularMaterial)              // «капля» macOS
+        .background(.regularMaterial)
         .cornerRadius(12)
     }
 
