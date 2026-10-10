@@ -1,5 +1,11 @@
 # AppTranslatorSimple
 
+![macOS 15+](https://img.shields.io/badge/macOS-15%2B-black?logo=apple)
+![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)
+[![License](https://img.shields.io/github/license/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM)](https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/total)](https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/releases)
+
 <img src="assets/popup-dark.png" width="474" alt="Translation popup">
 
 A minimal native macOS menu bar translator. Copy text twice (⌘C C) and the
