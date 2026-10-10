@@ -7,6 +7,7 @@ All notable changes, newest first. The format follows [Keep a Changelog](https:/
 ### Added
 - Google Translate method: Google's free web endpoint, no key or account. The source language comes
   from the app, as for macOS Translation. Many translations in a row may be refused for a while.
+- DeepL method, the same way: DeepL's free endpoint, no key or account, up to 1,500 characters per translation.
 
 ## [0.0.5] — 2026-10-10
 

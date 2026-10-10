@@ -15,11 +15,12 @@ public enum TranslationMethod: String, Codable, CaseIterable, Identifiable, Send
     case claude
     case appleTranslation = "apple"
     case google
+    case deepL = "deepl"
 
     public var id: Self { self }
 
     /// What Settings lists, in this order: the LLMs, then the rest. A method still in the works stays out.
-    public static let offered: [TranslationMethod] = [.localLLM, .claude, .appleTranslation, .google]
+    public static let offered: [TranslationMethod] = [.localLLM, .claude, .appleTranslation, .google, .deepL]
 
     public var title: String {
         switch self {
@@ -27,6 +28,7 @@ public enum TranslationMethod: String, Codable, CaseIterable, Identifiable, Send
         case .claude: return "Claude subscription"
         case .appleTranslation: return "macOS Translation"
         case .google: return "Google Translate"
+        case .deepL: return "DeepL"
         }
     }
 
@@ -37,6 +39,7 @@ public enum TranslationMethod: String, Codable, CaseIterable, Identifiable, Send
         case .claude: return "sparkle"
         case .appleTranslation: return "apple.logo"
         case .google: return "globe"
+        case .deepL: return "character.bubble"
         }
     }
 
@@ -44,7 +47,7 @@ public enum TranslationMethod: String, Codable, CaseIterable, Identifiable, Send
     public var isLLM: Bool {
         switch self {
         case .localLLM, .claude: return true
-        case .appleTranslation, .google: return false
+        case .appleTranslation, .google, .deepL: return false
         }
     }
 
@@ -56,7 +59,7 @@ public enum TranslationMethod: String, Codable, CaseIterable, Identifiable, Send
     func trimsAnswer(_ settings: Settings) -> Bool {
         switch self {
         case .localLLM: return settings.localLLM.trimAnswer
-        case .claude, .appleTranslation, .google: return false
+        case .claude, .appleTranslation, .google, .deepL: return false
         }
     }
 }

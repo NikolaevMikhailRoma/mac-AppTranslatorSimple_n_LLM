@@ -9,6 +9,7 @@ extension TranslationMethod {
         case .claude: return ClaudeProvider(settings: settings.claude)
         case .appleTranslation: return AppleTranslationProvider()
         case .google: return GoogleTranslateProvider()
+        case .deepL: return DeepLProvider()
         }
     }
 }

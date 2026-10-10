@@ -27,6 +27,7 @@ struct TranslationTab: View {
             case .appleTranslation: AppleTranslationSettingsView(language1: store.settings.language1,
                                                                  language2: store.settings.language2)
             case .google: GoogleTranslateSettingsView()
+            case .deepL: DeepLSettingsView()
             }
         }
     }
