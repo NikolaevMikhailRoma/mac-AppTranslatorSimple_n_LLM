@@ -34,7 +34,7 @@ struct TranslationTab: View {
 
     private func items(_ methods: [TranslationMethod]) -> some View {
         ForEach(methods) { method in
-            Label(method.title, systemImage: method.symbol).tag(method)
+            Text(method.title).tag(method)
         }
     }
 }

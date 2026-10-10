@@ -32,17 +32,6 @@ public enum TranslationMethod: String, Codable, CaseIterable, Identifiable, Send
         }
     }
 
-    /// SF Symbol shown next to the title in Settings.
-    public var symbol: String {
-        switch self {
-        case .localLLM: return "cpu"
-        case .claude: return "sparkle"
-        case .appleTranslation: return "apple.logo"
-        case .google: return "globe"
-        case .deepL: return "character.bubble"
-        }
-    }
-
     /// LLMs work alike: a prompt with the target language, any source language. Settings groups them.
     public var isLLM: Bool {
         switch self {

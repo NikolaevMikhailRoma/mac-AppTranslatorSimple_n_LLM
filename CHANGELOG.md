@@ -9,6 +9,10 @@ All notable changes, newest first. The format follows [Keep a Changelog](https:/
   from the app, as for macOS Translation. Many translations in a row may be refused for a while.
 - DeepL method, the same way: DeepL's free endpoint, no key or account, up to 1,500 characters per translation.
 
+### Changed
+- About moved from the menu bar icon's menu to the Settings window: About at the bottom left, Quit at the bottom right. The version and the What's new link are only in About now.
+- The method menu in Settings → Translation lists names only, without icons.
+
 ## [0.0.5] — 2026-10-10
 
 ### Added
