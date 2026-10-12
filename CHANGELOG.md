@@ -2,6 +2,12 @@
 
 All notable changes, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.0.7] — 2026-10-12
+
+### Fixed
+- Local LLM: an emptied Server URL field means the address it shows in grey (`http://127.0.0.1:1234/v1`).
+  Before, the app sent requests to an empty address and showed "No answer from the server at ."
+
 ## [0.0.6] — 2026-10-11
 
 ### Added
@@ -73,6 +79,7 @@ All notable changes, newest first. The format follows [Keep a Changelog](https:/
 ### Added
 - First prototype: ⌘C C translates EN↔RU with a local model in LM Studio (Xcode project, not buildable from the repo).
 
+[0.0.7]: https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/compare/v0.0.4...v0.0.5
 [0.0.4]: https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/compare/v0.0.3...v0.0.4
