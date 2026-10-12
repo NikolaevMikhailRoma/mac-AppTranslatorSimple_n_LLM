@@ -10,6 +10,14 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(settings.localLLM.baseURL, "http://127.0.0.1:1234/v1")
     }
 
+    func testEmptyServerURLMeansTheDefault() {
+        var settings = LocalLLMSettings()
+        settings.baseURL = " \n"
+        XCTAssertEqual(settings.serverURL, "http://127.0.0.1:1234/v1")
+        settings.baseURL = " http://10.0.0.5:8080/v1 "
+        XCTAssertEqual(settings.serverURL, "http://10.0.0.5:8080/v1")
+    }
+
     /// Settings saved before the Claude method keep everything and get its defaults.
     func testClaudeDefaultsForOlderSettings() {
         let s = Settings.decode(from: Data(#"{"method":"apple","secondLanguage":"de"}"#.utf8))

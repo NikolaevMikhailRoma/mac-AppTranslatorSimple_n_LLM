@@ -2,8 +2,15 @@ import Foundation
 
 /// Any OpenAI-compatible Chat Completions server: LM Studio, Ollama, llama.cpp and the like.
 public struct LocalLLMSettings: Codable, Equatable, Sendable {
-    /// Up to and including `/v1`, the way OpenAI-compatible servers print it.
-    public var baseURL = "http://127.0.0.1:1234/v1"
+    /// LM Studio's own address.
+    public static let defaultBaseURL = "http://127.0.0.1:1234/v1"
+    /// Up to and including `/v1`, the way OpenAI-compatible servers print it. As typed in Settings: see `serverURL`.
+    public var baseURL = LocalLLMSettings.defaultBaseURL
+    /// Where requests go. An emptied field shows the default in grey, so it means the default.
+    public var serverURL: String {
+        let typed = baseURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        return typed.isEmpty ? Self.defaultBaseURL : typed
+    }
     /// Empty means the model the server has loaded. Needed when the server has several.
     public var model = ""
     /// Advanced: the longest answer the model may write, in tokens.
