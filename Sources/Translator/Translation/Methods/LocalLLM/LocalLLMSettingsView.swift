@@ -14,7 +14,7 @@ struct LocalLLMSettingsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             FormRow(label: "Server URL") {
-                TextField("", text: $settings.baseURL, prompt: Text("http://127.0.0.1:1234/v1"))
+                TextField("", text: $settings.baseURL, prompt: Text(LocalLLMSettings.defaultBaseURL))
                     .frame(width: 230)
             }
             FormRow(label: "Model") {
@@ -71,12 +71,12 @@ struct LocalLLMSettingsView: View {
 
     private func loadModels() async {
         do {
-            models = try await OpenAIClient(baseURL: settings.baseURL).models()
+            models = try await OpenAIClient(baseURL: settings.serverURL).models()
             modelsError = nil
         } catch is CancellationError {
         } catch {
             models = nil
-            modelsError = "No answer from the server at \(settings.baseURL)."
+            modelsError = "No answer from the server at \(settings.serverURL)."
         }
     }
 }

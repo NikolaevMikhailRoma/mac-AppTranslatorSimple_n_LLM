@@ -1,6 +1,6 @@
 {
   "name": "AppTranslatorSimple",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "bundleIdentifier": "com.nikolaev.llmtranslator",
   "repository": "https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM"
 }

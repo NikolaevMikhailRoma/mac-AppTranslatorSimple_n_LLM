@@ -10,7 +10,7 @@ public final class LocalLLMProvider: TranslationProvider {
 
     public init(settings: LocalLLMSettings, client: OpenAIClient? = nil) {
         self.settings = settings
-        self.client = client ?? OpenAIClient(baseURL: settings.baseURL)
+        self.client = client ?? OpenAIClient(baseURL: settings.serverURL)
     }
 
     public func translate(text: String, from source: String?, to target: String) async throws -> String {
