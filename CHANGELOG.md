@@ -2,6 +2,11 @@
 
 All notable changes, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.1.0] — 2026-10-12
+
+### Changed
+- README: shorter, with a recording of a translation at the top.
+
 ## [0.0.7] — 2026-10-12
 
 ### Fixed
@@ -79,6 +84,7 @@ All notable changes, newest first. The format follows [Keep a Changelog](https:/
 ### Added
 - First prototype: ⌘C C translates EN↔RU with a local model in LM Studio (Xcode project, not buildable from the repo).
 
+[0.1.0]: https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/compare/v0.0.7...v0.1.0
 [0.0.7]: https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/compare/v0.0.4...v0.0.5
