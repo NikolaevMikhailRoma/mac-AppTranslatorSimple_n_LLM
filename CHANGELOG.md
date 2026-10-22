@@ -2,15 +2,18 @@
 
 All notable changes, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [0.1.1] — 2026-10-22
+
+### Added
+- Settings → Developer: Popup max height, as a share of the screen height (was fixed at 60%).
 
 ### Changed
 - The translation window no longer scrolls after new text while a long translation streams in.
   It stays where it is, so the beginning can be read; scroll down yourself.
 - When a translation outgrows the window, the window widens by the scroll bar instead of re-wrapping
   the lines under it (with scroll bars set to show always).
-- Settings → Developer: Popup max height, as a share of the screen height (was fixed at 60%).
 - Settings: clicking the ? next to a setting shows its explanation. Before, it only appeared on hover, after a pause.
+  The explanations are shorter.
 
 ## [0.1.0] — 2026-10-12
 
@@ -94,6 +97,7 @@ All notable changes, newest first. The format follows [Keep a Changelog](https:/
 ### Added
 - First prototype: ⌘C C translates EN↔RU with a local model in LM Studio (Xcode project, not buildable from the repo).
 
+[0.1.1]: https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/compare/v0.0.7...v0.1.0
 [0.0.7]: https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/NikolaevMikhailRoma/mac-AppTranslatorSimple_n_LLM/compare/v0.0.5...v0.0.6
