@@ -13,6 +13,8 @@ final class BubbleModel {
     private(set) var isFinished = false
     /// The text area: estimated from the original while streaming, fitted to the translation at the end.
     private(set) var size: CGSize
+    /// The text has outgrown the tallest popup; once set, it stays for this translation.
+    private(set) var scrolls = false
     @ObservationIgnored private var answer: StreamedText
     @ObservationIgnored private let maxSize: CGSize
 
@@ -27,7 +29,7 @@ final class BubbleModel {
         answer.append(piece)
         text = answer.text
         // Grow down instead of showing a scroller; never shrink while the text is still coming.
-        let needed = TranslationBubble.height(of: text, width: size.width, maxHeight: maxSize.height)
+        let needed = neededHeight()
         if needed > size.height { size.height = needed }
     }
 
@@ -47,6 +49,13 @@ final class BubbleModel {
 
     /// Cut the empty space below the text. The width stays, so the popup does not move sideways.
     private func fitToText() {
-        size.height = TranslationBubble.height(of: text, width: size.width, maxHeight: maxSize.height)
+        size.height = neededHeight()
+    }
+
+    /// The text's height at the popup's width, capped at the tallest popup; notes when it does not fit.
+    private func neededHeight() -> CGFloat {
+        let needed = TranslationBubble.height(of: text, width: size.width, maxHeight: .infinity)
+        if needed > maxSize.height { scrolls = true }
+        return min(needed, maxSize.height)
     }
 }

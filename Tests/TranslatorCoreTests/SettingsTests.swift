@@ -72,6 +72,7 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(s.developer.doubleCopyGapSeconds, 0.5)
         XCTAssertEqual(s.developer.popupMaxWidth, 800)
         XCTAssertEqual(s.developer.popupGrowth, 1.5)
+        XCTAssertEqual(s.developer.popupMaxHeightFraction, DeveloperSettings().popupMaxHeightFraction)
         XCTAssertFalse(s.developer.streamLLM)
         XCTAssertFalse(s.developer.highlightIconWhileTranslating)
     }

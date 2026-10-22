@@ -7,7 +7,7 @@ struct DeveloperTab: View {
 
     var body: some View {
         VStack(spacing: 4) {
-            FormRow(label: "⌘C C interval", help: "Two copies closer than this count as ⌘C C. Too short and a slow double press is missed; too long and two separate copies trigger a translation.") {
+            FormRow(label: "⌘C C interval", help: "Two copies within this time count as ⌘C C. Raise it if a slow double press is missed.") {
                 Slider(value: $store.settings.developer.doubleCopyGapSeconds,
                        in: DeveloperSettings.doubleCopyGapRange, step: 0.05)
                     .frame(width: 180)
@@ -15,14 +15,22 @@ struct DeveloperTab: View {
                     .monospacedDigit()
                     .frame(width: 52, alignment: .trailing)
             }
-            FormRow(label: "Popup max width", help: "The popup grows with the text up to this width, then wraps lines on screen. Copying never adds line breaks.") {
+            FormRow(label: "Popup max width", help: "The popup grows with the text up to this width.") {
                 Stepper(value: $store.settings.developer.popupMaxWidth,
                         in: DeveloperSettings.popupMaxWidthRange, step: 40) {
                     Text("\(store.settings.developer.popupMaxWidth) pt").monospacedDigit()
                 }
             }
+            FormRow(label: "Popup max height", help: "The popup grows down to this share of the screen height. Longer text scrolls.") {
+                Slider(value: $store.settings.developer.popupMaxHeightFraction,
+                       in: DeveloperSettings.popupMaxHeightFractionRange, step: 0.05)
+                    .frame(width: 180)
+                Text(String(format: "%.0f%%", store.settings.developer.popupMaxHeightFraction * 100))
+                    .monospacedDigit()
+                    .frame(width: 52, alignment: .trailing)
+            }
 
-            FormRow(label: "Popup size × original", help: "Before the translation arrives, the popup is sized as the original text times this. If the translation is longer, the popup grows down; when it ends, empty space is cut.") {
+            FormRow(label: "Popup size × original", help: "The popup opens at the original's size times this, then fits the translation.") {
                 Slider(value: $store.settings.developer.popupGrowth,
                        in: DeveloperSettings.popupGrowthRange, step: 0.1)
                     .frame(width: 180)
@@ -30,7 +38,7 @@ struct DeveloperTab: View {
                     .monospacedDigit()
                     .frame(width: 52, alignment: .trailing)
             }
-            FormRow(label: "Stream LLM answers", help: "On: the popup opens with the first word and fills as the model writes. Off: it opens once the whole translation is ready.") {
+            FormRow(label: "Stream LLM answers", help: "On: the translation appears as the model writes. Off: all at once.") {
                 Toggle("", isOn: $store.settings.developer.streamLLM)
                     .toggleStyle(.checkbox)
                     .labelsHidden()

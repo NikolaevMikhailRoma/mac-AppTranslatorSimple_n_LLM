@@ -37,7 +37,7 @@ final class TranslationController {
         let model = BubbleModel(header: "\(job.source ?? "auto") → \(job.target)", source: job.text, trims: job.trimsAnswer,
                                 growth: settings.developer.popupGrowth,
                                 maxSize: CGSize(width: CGFloat(settings.developer.popupMaxWidth),
-                                                height: screen.height * 0.6))
+                                                height: screen.height * settings.developer.popupMaxHeightFraction))
         current?.cancel()
         currentModel = model
 
