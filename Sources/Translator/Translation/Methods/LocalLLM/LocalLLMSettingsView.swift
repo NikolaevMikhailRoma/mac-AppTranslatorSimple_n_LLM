@@ -43,7 +43,7 @@ struct LocalLLMSettingsView: View {
             PromptEditor(prompt: $settings.prompt, language1: language1, language2: language2)
 
             SectionHeader(title: "Advanced")
-            FormRow(label: "Max answer length, tokens", help: "The longest translation the model may write. A token is about ¾ of an English word or half a Russian one. The arrows step by powers of two; any number can be typed.") {
+            FormRow(label: "Max answer length, tokens", help: "The longest translation the model may write. A token is about ¾ of an English word.") {
                 TextField("", value: Binding(
                     get: { settings.maxTokens },
                     set: { settings.maxTokens = min(max($0, LocalLLMSettings.maxTokensRange.lowerBound),
@@ -60,7 +60,7 @@ struct LocalLLMSettingsView: View {
                 .labelsHidden()
             }
             FormRow(label: "Trim spaces and newlines around the answer",
-                    help: "Remove spaces and empty lines the model puts before and after the translation. Off by default: current models rarely add them.") {
+                    help: "Removes spaces and empty lines around the translation. Rarely needed now.") {
                 Toggle("", isOn: $settings.trimAnswer)
                     .toggleStyle(.checkbox)
                     .labelsHidden()

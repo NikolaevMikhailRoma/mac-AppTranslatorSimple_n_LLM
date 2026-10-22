@@ -7,6 +7,8 @@ public struct DeveloperSettings: Codable, Equatable, Sendable {
     /// The popup grows with the text up to this width in points, then wraps it on screen only:
     /// no newline is added to what gets copied or selected.
     public var popupMaxWidth = 640
+    /// The popup grows down to this share of the screen's height; a longer translation scrolls.
+    public var popupMaxHeightFraction = 0.6
     /// The popup opens at the original's size × this, before the translation's real size is known.
     public var popupGrowth = 1.2
     /// LLM answers arrive word by word. Off: the popup appears with the whole translation at once.
@@ -16,6 +18,7 @@ public struct DeveloperSettings: Codable, Equatable, Sendable {
 
     public static let doubleCopyGapRange = 0.1...1.0
     public static let popupMaxWidthRange = 320...1_200
+    public static let popupMaxHeightFractionRange = 0.1...1.0
     public static let popupGrowthRange = 1.0...2.0
 
     public init() {}

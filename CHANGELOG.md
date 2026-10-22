@@ -9,6 +9,8 @@ All notable changes, newest first. The format follows [Keep a Changelog](https:/
   It stays where it is, so the beginning can be read; scroll down yourself.
 - When a translation outgrows the window, the window widens by the scroll bar instead of re-wrapping
   the lines under it (with scroll bars set to show always).
+- Settings → Developer: Popup max height, as a share of the screen height (was fixed at 60%).
+- Settings: clicking the ? next to a setting shows its explanation. Before, it only appeared on hover, after a pause.
 
 ## [0.1.0] — 2026-10-12
 

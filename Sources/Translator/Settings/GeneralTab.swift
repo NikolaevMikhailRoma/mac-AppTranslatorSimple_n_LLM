@@ -25,7 +25,7 @@ struct GeneralTab: View {
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .fixedSize(horizontal: false, vertical: true)
-            FormRow(label: "Join lines broken by PDF or e-mail", help: "Before translating, lines broken in the middle of a sentence are joined. Lines ending a sentence, blank lines and list items stay.") {
+            FormRow(label: "Join lines broken by PDF or e-mail", help: "Joins lines broken mid-sentence. Paragraphs and lists stay.") {
                 Toggle("", isOn: $store.settings.joinBrokenLines)
                     .toggleStyle(.checkbox)
                     .labelsHidden()
