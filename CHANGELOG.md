@@ -2,6 +2,14 @@
 
 All notable changes, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+- The translation window no longer scrolls after new text while a long translation streams in.
+  It stays where it is, so the beginning can be read; scroll down yourself.
+- When a translation outgrows the window, the window widens by the scroll bar instead of re-wrapping
+  the lines under it (with scroll bars set to show always).
+
 ## [0.1.0] — 2026-10-12
 
 ### Changed

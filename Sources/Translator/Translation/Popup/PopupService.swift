@@ -64,6 +64,8 @@ final class PopupService {
         var frame = panel.frame
         frame.origin.y += frame.height - size.height
         frame.size = size
+        // Growing wider (room for a scroller) must not push the right edge off the screen.
+        if let screen = panel.screen?.visibleFrame { frame.origin.x = min(frame.origin.x, screen.maxX - size.width) }
         panel.setFrame(frame, display: true)
     }
 
